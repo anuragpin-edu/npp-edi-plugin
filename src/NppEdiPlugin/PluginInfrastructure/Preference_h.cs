@@ -5,7 +5,7 @@
 // found at
 // https://github.com/notepad-plus-plus/notepad-plus-plus/blob/master/scintilla/include/Scintilla.iface
 
-namespace NppDemo.PluginInfrastructure
+namespace NppEdiPlugin.PluginInfrastructure
 {
 	public enum Preference
 	{

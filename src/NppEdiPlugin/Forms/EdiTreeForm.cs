@@ -11,9 +11,9 @@ namespace NppEdiPlugin.Forms
     {
         private TreeView _treeView;
         private Label _statusLabel;
-        private readonly IScintillaGateway _scintillaGateway;
+        private readonly ScintillaGateway _scintillaGateway;
 
-        public EdiTreeForm(IScintillaGateway scintillaGateway)
+        public EdiTreeForm(ScintillaGateway scintillaGateway)
         {
             _scintillaGateway = scintillaGateway;
             InitializeComponent();

@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
-using NppDemo.PluginInfrastructure;
-using NppDemo.Utils;
+using NppEdiPlugin.PluginInfrastructure;
+using NppEdiPlugin.Utils;
 
 namespace Kbg.NppPluginNET.PluginInfrastructure
 {

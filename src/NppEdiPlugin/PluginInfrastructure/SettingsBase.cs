@@ -11,7 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using NppDemo.Utils;
+using NppEdiPlugin.Utils;
 using Kbg.NppPluginNET;
 using Kbg.NppPluginNET.PluginInfrastructure;
 using System.Reflection;

@@ -21,8 +21,8 @@ namespace Kbg.NppPluginNET
         static Bitmap tbBmp_tbTab = new Bitmap(16, 16);
         static Icon tbIcon = null;
         
-        static IScintillaGateway scintilla = new ScintillaGateway(PluginBase.GetCurrentScintilla());
-        static INotepadPPGateway notepad = new NotepadPPGateway();
+        static ScintillaGateway scintilla = new ScintillaGateway(PluginBase.GetCurrentScintilla());
+        static NotepadPPGateway notepad = new NotepadPPGateway();
 
         // Parser setup
         static EdiParserDispatcher parserDispatcher = new EdiParserDispatcher(new[] { new EdifactParser() });
