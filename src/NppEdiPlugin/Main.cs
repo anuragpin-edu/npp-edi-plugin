@@ -21,6 +21,14 @@ namespace Kbg.NppPluginNET
         static Bitmap tbBmp_tbTab = new Bitmap(16, 16);
         static Icon tbIcon = null;
         
+        // Dummy properties to satisfy NppCSharpPluginPack Utils dependencies
+        public static string PluginConfigDirectory { get; set; }
+        public static bool isShuttingDown = false;
+        public static Form selectionRememberingForm = null;
+        public static int IdCloseHtmlTag = -1;
+        public static void RestyleEverything() { }
+        internal static void SetToolBarIcons() { SetToolBarIcon(); }
+
         static ScintillaGateway scintilla = new ScintillaGateway(PluginBase.GetCurrentScintilla());
         static NotepadPPGateway notepad = new NotepadPPGateway();
 
