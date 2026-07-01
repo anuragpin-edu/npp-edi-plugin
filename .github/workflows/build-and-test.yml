@@ -11,13 +11,31 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+        
     - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
+      run: |
+        nuget restore NppEdiPlugin.sln
+        dotnet restore
+        
+    - name: Build Core and Tests (dotnet)
       run: dotnet build --no-restore
-    - name: Test
+      
+    - name: Test (dotnet)
       run: dotnet test --no-build --verbosity normal
+
+    - name: Build NppEdiPlugin DLL (MSBuild)
+      run: msbuild src\NppEdiPlugin\NppEdiPlugin.csproj /p:Configuration=Release /p:Platform=x64
+
+    - name: Upload NppEdiPlugin Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: NppEdiPlugin-x64
+        path: src/NppEdiPlugin/bin/Release-x64/NppEdiPlugin.dll
