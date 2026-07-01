@@ -1,0 +1,171 @@
+{
+  "standard": "Edifact",
+  "version": "Phase1-Fixture",
+  "provenance": "Hand-authored from public UN/EDIFACT documentation (ISO 9735). Not derived from Bots-EDI or any GPL source.",
+  "segments": {
+    "UNB": {
+      "label": "Interchange Header",
+      "elements": {
+        "1": { "label": "Syntax Identifier", "components": { "0": "Syntax Identifier Code", "1": "Syntax Version Number" } },
+        "2": { "label": "Interchange Sender", "components": { "0": "Sender Identification", "1": "Identification Code Qualifier", "2": "Interchange Sender Internal ID" } },
+        "3": { "label": "Interchange Recipient", "components": { "0": "Recipient Identification", "1": "Identification Code Qualifier", "2": "Interchange Recipient Internal ID" } },
+        "4": { "label": "Date/Time of Preparation", "components": { "0": "Date (YYMMDD)", "1": "Time (HHMM)" } },
+        "5": { "label": "Interchange Control Reference" },
+        "6": { "label": "Recipient Reference/Password" },
+        "7": { "label": "Application Reference" },
+        "8": { "label": "Processing Priority Code" },
+        "9": { "label": "Acknowledgement Request" },
+        "10": { "label": "Interchange Agreement Identifier" },
+        "11": { "label": "Test Indicator" }
+      }
+    },
+    "UNH": {
+      "label": "Message Header",
+      "elements": {
+        "1": { "label": "Message Reference Number" },
+        "2": { "label": "Message Identifier", "components": { "0": "Message Type", "1": "Message Version Number", "2": "Message Release Number", "3": "Controlling Agency", "4": "Association Assigned Code" } }
+      }
+    },
+    "BGM": {
+      "label": "Beginning of Message",
+      "elements": {
+        "1": { "label": "Document/Message Name", "components": { "0": "Document Name Code", "1": "Code List Identification Code", "2": "Code List Responsible Agency Code", "3": "Document Name" } },
+        "2": { "label": "Document/Message Identification", "components": { "0": "Document Identifier", "1": "Version Identifier", "2": "Revision Identifier" } },
+        "3": { "label": "Message Function Code" },
+        "4": { "label": "Response Type Code" }
+      }
+    },
+    "DTM": {
+      "label": "Date/Time/Period",
+      "elements": {
+        "1": { "label": "Date/Time/Period", "components": { "0": "Date/Time/Period Qualifier", "1": "Date/Time/Period Value", "2": "Date/Time/Period Format Code" } }
+      }
+    },
+    "NAD": {
+      "label": "Name and Address",
+      "elements": {
+        "1": { "label": "Party Function Code Qualifier" },
+        "2": { "label": "Party Identification Details", "components": { "0": "Party Identifier", "1": "Code List Identification Code", "2": "Code List Responsible Agency Code" } },
+        "3": { "label": "Name and Address (Unstructured)" },
+        "4": { "label": "Party Name", "components": { "0": "Party Name Line 1", "1": "Party Name Line 2", "2": "Party Name Line 3", "3": "Party Name Line 4", "4": "Party Name Line 5" } },
+        "5": { "label": "Street", "components": { "0": "Street Line 1", "1": "Street Line 2", "2": "Street Line 3", "3": "Street Line 4" } },
+        "6": { "label": "City Name" },
+        "7": { "label": "Country Sub-entity Details" },
+        "8": { "label": "Postal Identification Code" },
+        "9": { "label": "Country Name Code" }
+      }
+    },
+    "LIN": {
+      "label": "Line Item",
+      "elements": {
+        "1": { "label": "Line Item Identifier" },
+        "2": { "label": "Action Request/Notification Code" },
+        "3": { "label": "Item Number Identification", "components": { "0": "Item Identifier", "1": "Item Type Identification Code", "2": "Code List Identification Code", "3": "Code List Responsible Agency Code" } }
+      }
+    },
+    "QTY": {
+      "label": "Quantity",
+      "elements": {
+        "1": { "label": "Quantity Details", "components": { "0": "Quantity Type Code Qualifier", "1": "Quantity", "2": "Measurement Unit Code" } }
+      }
+    },
+    "UNS": {
+      "label": "Section Control",
+      "elements": {
+        "1": { "label": "Section Identification" }
+      }
+    },
+    "FTX": {
+      "label": "Free Text",
+      "elements": {
+        "1": { "label": "Text Subject Code Qualifier" },
+        "2": { "label": "Free Text Function Code" },
+        "3": { "label": "Text Reference" },
+        "4": { "label": "Text Literal", "components": { "0": "Free Text Line 1", "1": "Free Text Line 2", "2": "Free Text Line 3", "3": "Free Text Line 4", "4": "Free Text Line 5" } },
+        "5": { "label": "Language Name Code" }
+      }
+    },
+    "UNT": {
+      "label": "Message Trailer",
+      "elements": {
+        "1": { "label": "Number of Segments in Message" },
+        "2": { "label": "Message Reference Number" }
+      }
+    },
+    "UNZ": {
+      "label": "Interchange Trailer",
+      "elements": {
+        "1": { "label": "Interchange Control Count" },
+        "2": { "label": "Interchange Control Reference" }
+      }
+    }
+  },
+  "qualifiers": {
+    "BGM": {
+      "1": {
+        "220": "Order",
+        "380": "Commercial Invoice",
+        "351": "Despatch Advice",
+        "231": "Blanket Order",
+        "105": "Purchase Order Change Request"
+      },
+      "3": {
+        "9": "Original",
+        "1": "Cancellation",
+        "5": "Replace",
+        "7": "Duplicate",
+        "31": "Copy",
+        "46": "Provisional"
+      }
+    },
+    "DTM": {
+      "1": {
+        "137": "Document/message date/time",
+        "2": "Delivery date/time, requested",
+        "63": "Delivery date/time, latest",
+        "64": "Delivery date/time, earliest",
+        "35": "Delivery date/time, actual",
+        "3": "Invoice date/time",
+        "4": "Order date/time",
+        "171": "Reference date/time"
+      }
+    },
+    "NAD": {
+      "1": {
+        "BY": "Buyer",
+        "SE": "Seller",
+        "SU": "Supplier",
+        "ST": "Ship to",
+        "SF": "Ship from",
+        "IV": "Invoicee",
+        "DP": "Delivery party",
+        "CN": "Consignee",
+        "CZ": "Consignor",
+        "MR": "Message Recipient"
+      }
+    },
+    "QTY": {
+      "1": {
+        "21": "Ordered quantity",
+        "12": "Despatched quantity",
+        "47": "Invoiced quantity",
+        "48": "Received quantity",
+        "61": "Return quantity"
+      }
+    },
+    "LIN": {
+      "3": {
+        "EN": "EAN/GTIN",
+        "IN": "Buyer's item number",
+        "SA": "Supplier's article number",
+        "SRV": "GS1 GTIN"
+      }
+    },
+    "UNS": {
+      "1": {
+        "D": "Detail section",
+        "S": "Summary section"
+      }
+    }
+  }
+}
