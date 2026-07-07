@@ -13,6 +13,17 @@ namespace Edi.Edifact.Formatting
     public sealed class EdifactFormatter : IEdiFormatter
     {
         /// <summary>
+        /// Determines whether this formatter can handle the given text by checking
+        /// whether it appears to be EDIFACT content.
+        /// </summary>
+        /// <param name="text">The raw EDI text to inspect.</param>
+        /// <returns><c>true</c> if the text is EDIFACT; otherwise <c>false</c>.</returns>
+        public bool CanFormat(string text)
+        {
+            return EdifactDelimiterDetector.IsEdifact(text);
+        }
+
+        /// <summary>
         /// Formats the EDIFACT text so each segment appears on its own line.
         /// The UNA service string (if present) appears as the first line.
         /// </summary>
