@@ -29,7 +29,7 @@ namespace Edi.Edifact.Parsing
         public static List<EdiElement> ParseElements(
             string segmentBody,
             EdiDelimiters delimiters,
-            IEdiDictionary? dictionary,
+            IEdiDictionary? dictionary, string? version,
             EdiStandard standard,
             string segmentTag)
         {

@@ -10,7 +10,9 @@
     <ProjectReference Include="..\Edi.Core\Edi.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="edifact-phase1.json" />
+    <None Update="Data\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="8.0.5" />

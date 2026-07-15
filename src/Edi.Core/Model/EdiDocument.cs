@@ -8,13 +8,15 @@ namespace Edi.Core.Model
     public sealed class EdiDocument
     {
         public EdiStandard Standard { get; }
+        public string? Version { get; }
         public IReadOnlyList<EdiSegment> Segments { get; }
         public IReadOnlyList<EdiValidationIssue> Issues { get; }
         public EdiDelimiters? Delimiters { get; }
 
-        public EdiDocument(EdiStandard standard, IReadOnlyList<EdiSegment> segments, IReadOnlyList<EdiValidationIssue>? issues = null, EdiDelimiters? delimiters = null)
+        public EdiDocument(EdiStandard standard, string? version, IReadOnlyList<EdiSegment> segments, IReadOnlyList<EdiValidationIssue>? issues = null, EdiDelimiters? delimiters = null)
         {
             Standard = standard;
+            Version = version;
             Segments = segments;
             Issues = issues ?? new List<EdiValidationIssue>();
             Delimiters = delimiters;

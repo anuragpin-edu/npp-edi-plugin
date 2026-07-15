@@ -1,0 +1,28 @@
+{
+  "importedAt": "2026-07-15T00:00:00Z",
+  "sourceRepository": "https://github.com/hellooops/vscode-edi-support",
+  "sourceCommit": "10d39d2495a1a8b5264bf35c311a1e07efa745e7",
+  "files": [
+    {
+      "standard": "X12",
+      "release": "00401",
+      "filename": "x12_00401.json",
+      "segments": 970,
+      "messages": 294
+    },
+    {
+      "standard": "X12",
+      "release": "00501",
+      "filename": "x12_00501.json",
+      "segments": 1004,
+      "messages": 318
+    },
+    {
+      "standard": "EDIFACT",
+      "release": "D96A",
+      "filename": "edifact_D96A.json",
+      "segments": 130,
+      "messages": 125
+    }
+  ]
+}

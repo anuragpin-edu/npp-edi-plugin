@@ -18,6 +18,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Edi.Dictionaries.Tests", "t
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NppEdiPlugin", "src\NppEdiPlugin\NppEdiPlugin.csproj", "{EB8FC3A3-93E8-457B-B281-FAFA5119611A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Edi.X12", "src\Edi.X12\Edi.X12.csproj", "{4C9264E2-F4F1-4E60-84E3-ED908AE23420}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Edi.X12.Tests", "tests\Edi.X12.Tests\Edi.X12.Tests.csproj", "{0535384F-664B-48FA-A7A2-15A8ABCF1DA2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

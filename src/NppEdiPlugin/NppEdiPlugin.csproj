@@ -59,6 +59,10 @@
       <Project>{C3D4E5F6-A7B8-9012-CDEF-123456789012}</Project>
       <Name>Edi.Dictionaries</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Edi.X12\Edi.X12.csproj">
+      <Project>{4C9264E2-F4F1-4E60-84E3-ED908AE23420}</Project>
+      <Name>Edi.X12</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Forms\EdiTreeForm.cs">
