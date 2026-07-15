@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Xunit;
 using Edi.X12.Parsing;
 
@@ -14,9 +13,9 @@ namespace Edi.X12.Tests.Parsing
 
             var doc = parser.Parse(text, null);
 
-            doc.Should().NotBeNull();
-            doc.Segments.Count.Should().Be(12);
-            doc.Issues.Should().BeEmpty();
+            Assert.NotNull(doc);
+            Assert.Equal(12, doc.Segments.Count);
+            Assert.Empty(doc.Issues);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace Edi.Core.Dictionary
 {
     public static class EdiVersionNormalizer
     {
-        public static string Normalize(EdiStandard standard, string rawVersion)
+        public static string Normalize(EdiStandard standard, string? rawVersion)
         {
             if (string.IsNullOrWhiteSpace(rawVersion))
                 return string.Empty;

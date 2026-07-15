@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Xunit;
 using Edi.X12.Parsing;
 
@@ -14,8 +13,8 @@ namespace Edi.X12.Tests.Validation
 
             var doc = parser.Parse(text, null);
 
-            doc.Issues.Should().NotBeNull();
-            doc.Issues.Should().Contain(i => i.Code == "X12_MISSING_IEA");
+            Assert.NotNull(doc.Issues);
+            Assert.Contains(doc.Issues, i => i.Code == "X12_MISSING_IEA");
         }
     }
 }

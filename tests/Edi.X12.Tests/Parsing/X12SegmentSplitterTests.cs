@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Xunit;
 using Edi.Core.Model;
 using Edi.X12.Parsing;
@@ -15,10 +14,10 @@ namespace Edi.X12.Tests.Parsing
 
             var segments = X12SegmentSplitter.Split(text, delimiters, 0);
 
-            segments.Count.Should().Be(3);
-            segments[0].RawText.Should().Be("ISA*00*");
-            segments[1].RawText.Should().Be("GS*PO*");
-            segments[2].RawText.Should().Be("ST*850*");
+            Assert.Equal(3, segments.Count);
+            Assert.Equal("ISA*00*", segments[0].RawText);
+            Assert.Equal("GS*PO*", segments[1].RawText);
+            Assert.Equal("ST*850*", segments[2].RawText);
         }
     }
 }

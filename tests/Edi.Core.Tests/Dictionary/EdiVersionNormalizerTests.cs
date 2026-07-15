@@ -18,7 +18,7 @@ namespace Edi.Core.Tests.Dictionary
         [InlineData(null, "")]
         [InlineData("   ", "")]
         [InlineData("D96A", "")]
-        public void Normalize_X12_ReturnsBaseRelease(string raw, string expected)
+        public void Normalize_X12_ReturnsBaseRelease(string? raw, string expected)
         {
             var result = EdiVersionNormalizer.Normalize(EdiStandard.X12, raw);
             Assert.Equal(expected, result);
