@@ -23,7 +23,7 @@ public class JsonEdiDictionaryTests
     public void GetSegmentLabel_Unknown_ReturnsNull()
     {
         // Act
-        var label = _dictionary.GetSegmentLabel(EdiStandard.Edifact, "ZZZ");
+        var label = _dictionary.GetSegmentLabel(EdiStandard.Edifact, "D96A", "ZZZ");
 
         // Assert
         Assert.Null(label);
@@ -33,7 +33,7 @@ public class JsonEdiDictionaryTests
     public void GetElementLabel_BgmPosition1_ReturnsDocumentMessageName()
     {
         // Act
-        var label = _dictionary.GetElementLabel(EdiStandard.Edifact, "BGM", 1);
+        var label = _dictionary.GetElementLabel(EdiStandard.Edifact, "D96A", "BGM", 1);
 
         // Assert
         Assert.NotNull(label);
@@ -55,7 +55,7 @@ public class JsonEdiDictionaryTests
     public void GetQualifierLabel_UnknownValue_ReturnsNull()
     {
         // Act
-        var label = _dictionary.GetQualifierLabel(EdiStandard.Edifact, "NAD", 1, "ZZZZZ");
+        var label = _dictionary.GetQualifierLabel(EdiStandard.Edifact, "D96A", "NAD", 1, "ZZZZZ");
 
         // Assert
         Assert.Null(label);
@@ -65,7 +65,7 @@ public class JsonEdiDictionaryTests
     public void GetSegmentLabel_X12Standard_ReturnsNull()
     {
         // Act — the JSON dictionary only covers EDIFACT in Phase 1
-        var label = _dictionary.GetSegmentLabel(EdiStandard.X12, "ISA");
+        var label = _dictionary.GetSegmentLabel(EdiStandard.X12, "00401", "ISA");
 
         // Assert
         Assert.Null(label);

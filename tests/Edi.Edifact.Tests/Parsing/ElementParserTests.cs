@@ -17,7 +17,7 @@ public class ElementParserTests
 
         // Act
         var result = EdifactElementParser.ParseElements(
-            segmentBody, Defaults, dictionary: null, EdiStandard.Edifact, "BGM");
+            segmentBody, Defaults, dictionary: null, null, EdiStandard.Edifact, "BGM");
 
         // Assert
         Assert.Equal(3, result.Count);
@@ -34,7 +34,7 @@ public class ElementParserTests
 
         // Act
         var result = EdifactElementParser.ParseElements(
-            segmentBody, Defaults, dictionary: null, EdiStandard.Edifact, "UNB");
+            segmentBody, Defaults, dictionary: null, null, EdiStandard.Edifact, "UNB");
 
         // Assert
         Assert.Single(result);
@@ -51,7 +51,7 @@ public class ElementParserTests
 
         // Act
         var result = EdifactElementParser.ParseElements(
-            segmentBody, Defaults, dictionary: null, EdiStandard.Edifact, "FTX");
+            segmentBody, Defaults, dictionary: null, null, EdiStandard.Edifact, "FTX");
 
         // Assert
         Assert.Single(result);
@@ -66,7 +66,7 @@ public class ElementParserTests
 
         // Act
         var result = EdifactElementParser.ParseElements(
-            segmentBody, Defaults, dictionary: null, EdiStandard.Edifact, "TST");
+            segmentBody, Defaults, dictionary: null, null, EdiStandard.Edifact, "TST");
 
         // Assert
         Assert.Equal(3, result.Count);
@@ -81,7 +81,7 @@ public class ElementParserTests
 
         // Act
         var result = EdifactElementParser.ParseElements(
-            segmentBody, Defaults, dictionary: null, EdiStandard.Edifact, "FTX");
+            segmentBody, Defaults, dictionary: null, null, EdiStandard.Edifact, "FTX");
 
         // Assert
         Assert.Single(result);
