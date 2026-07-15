@@ -61,12 +61,12 @@ namespace Edi.Edifact.Parsing
                     for (int j = 0; j < componentStrings.Count; j++)
                     {
                         string? componentLabel = dictionary?.GetComponentLabel(
-                            standard, segmentTag, position, j);
+                            standard, version, segmentTag, position, j);
                         components.Add(new EdiComponent(j, componentStrings[j], componentLabel));
                     }
                 }
 
-                string? elementLabel = dictionary?.GetElementLabel(standard, segmentTag, position);
+                string? elementLabel = dictionary?.GetElementLabel(standard, version, segmentTag, position);
 
                 elements.Add(new EdiElement(
                     position,

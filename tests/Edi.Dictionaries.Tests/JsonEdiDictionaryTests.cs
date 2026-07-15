@@ -12,7 +12,7 @@ public class JsonEdiDictionaryTests
     public void GetSegmentLabel_Unb_ReturnsInterchangeHeader()
     {
         // Act
-        var label = _dictionary.GetSegmentLabel(EdiStandard.Edifact, "UNB");
+        var label = _dictionary.GetSegmentLabel(EdiStandard.Edifact, "D96A", "UNB");
 
         // Assert
         Assert.NotNull(label);
@@ -44,7 +44,7 @@ public class JsonEdiDictionaryTests
     public void GetQualifierLabel_NadBy_ReturnsBuyer()
     {
         // Act
-        var label = _dictionary.GetQualifierLabel(EdiStandard.Edifact, "NAD", 1, "BY");
+        var label = _dictionary.GetQualifierLabel(EdiStandard.Edifact, "D96A", "NAD", 1, "BY");
 
         // Assert
         Assert.NotNull(label);
@@ -75,7 +75,7 @@ public class JsonEdiDictionaryTests
     public void GetComponentLabel_UnbElement1Component0_ReturnsSyntaxIdentifierCode()
     {
         // Act
-        var label = _dictionary.GetComponentLabel(EdiStandard.Edifact, "UNB", 1, 0);
+        var label = _dictionary.GetComponentLabel(EdiStandard.Edifact, "D96A", "UNB", 1, 0);
 
         // Assert
         Assert.NotNull(label);
