@@ -16,7 +16,7 @@ namespace Edi.X12.Tests.Parsing
 
             doc.Should().NotBeNull();
             doc.Segments.Count.Should().Be(12);
-            doc.ValidationIssues.Should().BeNull();
+            doc.Issues.Should().BeEmpty();
         }
     }
 }

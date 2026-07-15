@@ -14,8 +14,8 @@ namespace Edi.X12.Tests.Validation
 
             var doc = parser.Parse(text, null);
 
-            doc.ValidationIssues.Should().NotBeNull();
-            doc.ValidationIssues.Should().Contain(i => i.Code == "X12_MISSING_IEA");
+            doc.Issues.Should().NotBeNull();
+            doc.Issues.Should().Contain(i => i.Code == "X12_MISSING_IEA");
         }
     }
 }

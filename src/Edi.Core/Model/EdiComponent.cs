@@ -8,12 +8,14 @@ namespace Edi.Core.Model
         public int Index { get; }
         public string RawValue { get; }
         public string? Label { get; }
+        public string? ValueDescription { get; }
 
-        public EdiComponent(int index, string rawValue, string? label = null)
+        public EdiComponent(int index, string rawValue, string? label = null, string? valueDescription = null)
         {
             Index = index;
             RawValue = rawValue;
             Label = label;
+            ValueDescription = valueDescription;
         }
     }
 }

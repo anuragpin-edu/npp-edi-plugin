@@ -62,16 +62,26 @@ namespace Edi.Edifact.Parsing
                     {
                         string? componentLabel = dictionary?.GetComponentLabel(
                             standard, version, segmentTag, position, j);
-                        components.Add(new EdiComponent(j, componentStrings[j], componentLabel));
+                        string? compValueDesc = dictionary?.GetQualifierLabel(
+                            standard, version, segmentTag, position, componentStrings[j]);
+                        components.Add(new EdiComponent(j, componentStrings[j], componentLabel, compValueDesc));
                     }
                 }
 
                 string? elementLabel = dictionary?.GetElementLabel(standard, version, segmentTag, position);
+                string? elementValueDesc = null;
+                
+                // If it's a simple element without components, check if its value has a description.
+                if (components == null)
+                {
+                    elementValueDesc = dictionary?.GetQualifierLabel(standard, version, segmentTag, position, rawElement);
+                }
 
                 elements.Add(new EdiElement(
                     position,
                     rawElement,
                     elementLabel,
+                    elementValueDesc,
                     components != null
                         ? (IReadOnlyList<EdiComponent>)components
                         : null));

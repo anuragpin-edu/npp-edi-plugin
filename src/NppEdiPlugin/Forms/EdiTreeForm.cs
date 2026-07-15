@@ -10,9 +10,9 @@ namespace NppEdiPlugin.Forms
     {
         private TreeView _treeView;
         private Label _statusLabel;
-        private IScintillaGateway _scintilla;
+        private ScintillaGateway _scintilla;
 
-        public EdiTreeForm(IScintillaGateway scintilla)
+        public EdiTreeForm(ScintillaGateway scintilla)
         {
             _scintilla = scintilla;
             InitializeComponent();
@@ -87,6 +87,10 @@ namespace NppEdiPlugin.Forms
                     {
                         elNode.Text += $" - {element.Label}";
                     }
+                    if (!string.IsNullOrEmpty(element.ValueDescription))
+                    {
+                        elNode.Text += $" ({element.ValueDescription})";
+                    }
 
                     foreach (var component in element.Components)
                     {
@@ -98,6 +102,10 @@ namespace NppEdiPlugin.Forms
                         if (!string.IsNullOrEmpty(component.Label))
                         {
                             compNode.Text += $" - {component.Label}";
+                        }
+                        if (!string.IsNullOrEmpty(component.ValueDescription))
+                        {
+                            compNode.Text += $" ({component.ValueDescription})";
                         }
 
                         elNode.Nodes.Add(compNode);
@@ -122,7 +130,6 @@ namespace NppEdiPlugin.Forms
                 if (offsets.Start > 0 || offsets.End > 0)
                 {
                     _scintilla.SetSelection(offsets.Start, offsets.End);
-                    _scintilla.MakeSelectionVisible();
                 }
             }
         }

@@ -10,13 +10,15 @@ namespace Edi.Core.Model
         public int Position { get; }
         public string RawValue { get; }
         public string? Label { get; }
+        public string? ValueDescription { get; }
         public IReadOnlyList<EdiComponent> Components { get; }
 
-        public EdiElement(int position, string rawValue, string? label = null, IReadOnlyList<EdiComponent>? components = null)
+        public EdiElement(int position, string rawValue, string? label = null, string? valueDescription = null, IReadOnlyList<EdiComponent>? components = null)
         {
             Position = position;
             RawValue = rawValue;
             Label = label;
+            ValueDescription = valueDescription;
             Components = components ?? new List<EdiComponent>();
         }
     }

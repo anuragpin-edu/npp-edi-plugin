@@ -37,12 +37,14 @@ namespace Edi.Edifact.Parsing
                         var comps = elements[1].Split(delimiters.ComponentSeparator);
                         if (comps.Length >= 3)
                         {
-                            version = comps[1] + comps[2]; // e.g. D96A
+                            version = comps[1] + ":" + comps[2]; // e.g. D:96A
                         }
                     }
                     break;
                 }
             }
+
+            string? dictionaryRelease = version != null ? EdiVersionNormalizer.Normalize(EdiStandard.Edifact, version) : null;
 
             var segments = new List<EdiSegment>(rawSegments.Count);
 
@@ -51,10 +53,10 @@ namespace Edi.Edifact.Parsing
                 ExtractTagAndBody(rawText, delimiters.ElementSeparator, out string tag, out string? body);
 
                 List<EdiElement> elements = body != null
-                    ? EdifactElementParser.ParseElements(body, delimiters, dictionary, version, EdiStandard.Edifact, tag)
+                    ? EdifactElementParser.ParseElements(body, delimiters, dictionary, dictionaryRelease, EdiStandard.Edifact, tag)
                     : new List<EdiElement>();
 
-                string? segmentLabel = dictionary?.GetSegmentLabel(EdiStandard.Edifact, version, tag);
+                string? segmentLabel = dictionary?.GetSegmentLabel(EdiStandard.Edifact, dictionaryRelease, tag);
 
                 segments.Add(new EdiSegment(
                     tag,
@@ -66,10 +68,10 @@ namespace Edi.Edifact.Parsing
             }
 
             var validator = new EdifactEnvelopeValidator();
-            var tempDoc = new EdiDocument(EdiStandard.Edifact, version, segments, null, delimiters);
+            var tempDoc = new EdiDocument(EdiStandard.Edifact, version, dictionaryRelease, segments, null, delimiters);
             var issues = validator.Validate(tempDoc);
 
-            return new EdiDocument(EdiStandard.Edifact, version, segments, issues.Count > 0 ? issues : null, delimiters);
+            return new EdiDocument(EdiStandard.Edifact, version, dictionaryRelease, segments, issues.Count > 0 ? issues : null, delimiters);
         }
 
         private static void ExtractTagAndBody(string rawText, char elementSeparator, out string tag, out string? body)

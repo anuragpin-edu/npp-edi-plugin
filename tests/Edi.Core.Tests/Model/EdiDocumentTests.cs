@@ -13,7 +13,7 @@ public class EdiDocumentTests
         var issues = new List<EdiValidationIssue> { new EdiValidationIssue("CODE", "MSG", 0, 5, EdiIssueSeverity.Error) };
         var delimiters = EdiDelimiters.EdifactDefaults;
 
-        var doc = new EdiDocument(EdiStandard.Edifact, "D96A", segments, issues, delimiters);
+        var doc = new EdiDocument(EdiStandard.Edifact, "D96A", "D96A", segments, issues, delimiters);
 
         Assert.Equal(EdiStandard.Edifact, doc.Standard);
         Assert.Equal("D96A", doc.Version);
@@ -26,7 +26,7 @@ public class EdiDocumentTests
     public void Constructor_WithNullIssues_InitializesEmptyList()
     {
         var segments = new List<EdiSegment>();
-        var doc = new EdiDocument(EdiStandard.Unknown, null, segments);
+        var doc = new EdiDocument(EdiStandard.Unknown, null, null, segments);
 
         Assert.Equal(EdiStandard.Unknown, doc.Standard);
         Assert.Null(doc.Version);

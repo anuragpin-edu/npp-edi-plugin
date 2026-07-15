@@ -24,7 +24,7 @@ public class EdiParserDispatcherTests
         public EdiDocument Parse(string text, IEdiDictionary? dictionary)
         {
             return new EdiDocument(
-                _standard, null,
+                _standard, null, null,
                 new List<EdiSegment>
                 {
                     new EdiSegment("TST", text, 0, text.Length)

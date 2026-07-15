@@ -21,7 +21,8 @@ namespace Edi.X12.Parsing
                 throw new ArgumentNullException(nameof(text));
 
             EdiDelimiters delimiters = X12DelimiterDetector.Detect(text);
-            var rawSegments = X12SegmentSplitter.Split(text, delimiters.SegmentTerminator);
+            int dataStartOffset = X12DelimiterDetector.GetDataStartOffset(text);
+            var rawSegments = X12SegmentSplitter.Split(text, delimiters, dataStartOffset);
 
             // Extract version from GS or ISA
             string? version = null;
@@ -34,7 +35,6 @@ namespace Edi.X12.Parsing
                     if (elements.Length >= 8)
                     {
                         version = elements[7];
-                        if (version.EndsWith("0")) version = version.Substring(0, version.Length - 1); // 004010 -> 00401
                     }
                     break;
                 }
@@ -48,6 +48,8 @@ namespace Edi.X12.Parsing
                 }
             }
 
+            string? dictionaryRelease = version != null ? EdiVersionNormalizer.Normalize(EdiStandard.X12, version) : null;
+
             var segments = new List<EdiSegment>(rawSegments.Count);
 
             foreach (var (rawText, startOffset, endOffset) in rawSegments)
@@ -55,10 +57,10 @@ namespace Edi.X12.Parsing
                 ExtractTagAndBody(rawText, delimiters.ElementSeparator, out string tag, out string? body);
 
                 List<EdiElement> elements = body != null
-                    ? X12ElementParser.ParseElements(body, delimiters.ElementSeparator, delimiters.ComponentSeparator, dictionary, version, tag)
+                    ? X12ElementParser.ParseElements(body, delimiters.ElementSeparator, delimiters.ComponentSeparator, dictionary, dictionaryRelease, tag)
                     : new List<EdiElement>();
 
-                string? segmentLabel = dictionary?.GetSegmentLabel(EdiStandard.X12, version, tag);
+                string? segmentLabel = dictionary?.GetSegmentLabel(EdiStandard.X12, dictionaryRelease, tag);
 
                 segments.Add(new EdiSegment(
                     tag,
@@ -70,10 +72,10 @@ namespace Edi.X12.Parsing
             }
 
             var validator = new X12EnvelopeValidator();
-            var tempDoc = new EdiDocument(EdiStandard.X12, version, segments, null, delimiters);
+            var tempDoc = new EdiDocument(EdiStandard.X12, version, dictionaryRelease, segments, null, delimiters);
             var issues = validator.Validate(tempDoc);
 
-            return new EdiDocument(EdiStandard.X12, version, segments, issues.Count > 0 ? issues : null, delimiters);
+            return new EdiDocument(EdiStandard.X12, version, dictionaryRelease, segments, issues.Count > 0 ? issues : null, delimiters);
         }
 
         private static void ExtractTagAndBody(string rawText, char elementSeparator, out string tag, out string? body)

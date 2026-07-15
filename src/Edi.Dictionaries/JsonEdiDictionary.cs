@@ -57,7 +57,7 @@ namespace Edi.Dictionaries
                 return cached;
             }
 
-            var dir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? ".", "Data");
+            var dir = Path.Combine(Path.GetDirectoryName(typeof(JsonEdiDictionary).Assembly.Location) ?? ".", "Data");
             var filename = $"{standard.ToString().ToLowerInvariant()}_{release}.json";
             var filePath = Path.Combine(dir, filename);
 
@@ -116,8 +116,7 @@ namespace Edi.Dictionaries
 
         public string? GetComponentLabel(EdiStandard standard, string? version, string segmentTag, int elementPosition, int componentIndex)
         {
-            // Note: componentIndex is 0-based in EdiComponent. 
-            // The position in JSON is 1-based.
+            // Note: componentIndex passed here is 1-based.
             var schema = GetSchema(standard, version);
             if (schema?.Segments != null && schema.Segments.TryGetValue(segmentTag, out var segment) && segment.Elements != null)
             {
@@ -125,7 +124,7 @@ namespace Edi.Dictionaries
                 {
                     if (el.Position == elementPosition && el.Components != null)
                     {
-                        var targetPos = componentIndex + 1;
+                        var targetPos = componentIndex;
                         foreach (var comp in el.Components)
                         {
                             if (comp.Position == targetPos) return comp.Name;

@@ -9,14 +9,16 @@ namespace Edi.Core.Model
     {
         public EdiStandard Standard { get; }
         public string? Version { get; }
+        public string? DictionaryRelease { get; }
         public IReadOnlyList<EdiSegment> Segments { get; }
         public IReadOnlyList<EdiValidationIssue> Issues { get; }
         public EdiDelimiters? Delimiters { get; }
 
-        public EdiDocument(EdiStandard standard, string? version, IReadOnlyList<EdiSegment> segments, IReadOnlyList<EdiValidationIssue>? issues = null, EdiDelimiters? delimiters = null)
+        public EdiDocument(EdiStandard standard, string? version, string? dictionaryRelease, IReadOnlyList<EdiSegment> segments, IReadOnlyList<EdiValidationIssue>? issues = null, EdiDelimiters? delimiters = null)
         {
             Standard = standard;
             Version = version;
+            DictionaryRelease = dictionaryRelease;
             Segments = segments;
             Issues = issues ?? new List<EdiValidationIssue>();
             Delimiters = delimiters;
