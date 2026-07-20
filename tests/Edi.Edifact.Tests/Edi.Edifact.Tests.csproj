@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="../../src/Edi.Core/Edi.Core.csproj" />
     <ProjectReference Include="../../src/Edi.Edifact/Edi.Edifact.csproj" />
+    <ProjectReference Include="..\..\src\Edi.Dictionaries\Edi.Dictionaries.csproj" />
   </ItemGroup>
 
 </Project>

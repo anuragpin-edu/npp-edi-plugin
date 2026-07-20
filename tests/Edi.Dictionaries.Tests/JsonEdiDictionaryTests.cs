@@ -9,21 +9,21 @@ public class JsonEdiDictionaryTests
     private readonly JsonEdiDictionary _dictionary = new();
 
     [Fact]
-    public void GetSegmentLabel_Unb_ReturnsInterchangeHeader()
+    public void GetSegmentLabel_Bgm_ReturnsBeginningOfMessage()
     {
         // Act
-        var label = _dictionary.GetSegmentLabel(EdiStandard.Edifact, "UNB");
+        var label = _dictionary.GetSegmentLabel(EdiStandard.Edifact, "D96A", "BGM");
 
         // Assert
         Assert.NotNull(label);
-        Assert.Contains("Interchange", label, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("BEGINNING OF MESSAGE", label, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
     public void GetSegmentLabel_Unknown_ReturnsNull()
     {
         // Act
-        var label = _dictionary.GetSegmentLabel(EdiStandard.Edifact, "ZZZ");
+        var label = _dictionary.GetSegmentLabel(EdiStandard.Edifact, "D96A", "ZZZ");
 
         // Assert
         Assert.Null(label);
@@ -33,18 +33,18 @@ public class JsonEdiDictionaryTests
     public void GetElementLabel_BgmPosition1_ReturnsDocumentMessageName()
     {
         // Act
-        var label = _dictionary.GetElementLabel(EdiStandard.Edifact, "BGM", 1);
+        var label = _dictionary.GetElementLabel(EdiStandard.Edifact, "D96A", "BGM", 1);
 
         // Assert
         Assert.NotNull(label);
-        Assert.Contains("Document", label, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("DOCUMENT/MESSAGE NAME", label, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
     public void GetQualifierLabel_NadBy_ReturnsBuyer()
     {
         // Act
-        var label = _dictionary.GetQualifierLabel(EdiStandard.Edifact, "NAD", 1, "BY");
+        var label = _dictionary.GetQualifierLabel(EdiStandard.Edifact, "D96A", "NAD", 1, "BY");
 
         // Assert
         Assert.NotNull(label);
@@ -55,7 +55,7 @@ public class JsonEdiDictionaryTests
     public void GetQualifierLabel_UnknownValue_ReturnsNull()
     {
         // Act
-        var label = _dictionary.GetQualifierLabel(EdiStandard.Edifact, "NAD", 1, "ZZZZZ");
+        var label = _dictionary.GetQualifierLabel(EdiStandard.Edifact, "D96A", "NAD", 1, "ZZZZZ");
 
         // Assert
         Assert.Null(label);
@@ -64,21 +64,21 @@ public class JsonEdiDictionaryTests
     [Fact]
     public void GetSegmentLabel_X12Standard_ReturnsNull()
     {
-        // Act — the JSON dictionary only covers EDIFACT in Phase 1
-        var label = _dictionary.GetSegmentLabel(EdiStandard.X12, "ISA");
+        // Act - the JSON dictionary might not have ISA if not loaded yet
+        var label = _dictionary.GetSegmentLabel(EdiStandard.X12, "00401", "ISA");
 
         // Assert
         Assert.Null(label);
     }
 
     [Fact]
-    public void GetComponentLabel_UnbElement1Component0_ReturnsSyntaxIdentifierCode()
+    public void GetComponentLabel_BgmElement1Component1_ReturnsDocumentNameCode()
     {
         // Act
-        var label = _dictionary.GetComponentLabel(EdiStandard.Edifact, "UNB", 1, 0);
+        var label = _dictionary.GetComponentLabel(EdiStandard.Edifact, "D96A", "BGM", 1, 1);
 
         // Assert
         Assert.NotNull(label);
-        Assert.Contains("Syntax", label, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Document/message name, coded", label, StringComparison.OrdinalIgnoreCase);
     }
 }

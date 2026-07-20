@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Edi.Core.Dictionary;
 using Edi.Core.Model;
 using Edi.Core.Parsing;
@@ -23,7 +24,7 @@ public class EdiParserDispatcherTests
         public EdiDocument Parse(string text, IEdiDictionary? dictionary)
         {
             return new EdiDocument(
-                _standard,
+                _standard, null, null,
                 new List<EdiSegment>
                 {
                     new EdiSegment("TST", text, 0, text.Length)
@@ -34,14 +35,9 @@ public class EdiParserDispatcherTests
     [Fact]
     public void Dispatch_WithMatchingParser_ReturnsResult()
     {
-        // Arrange
         var parsers = new List<IEdiParser> { new MockParser(canParse: true) };
         var dispatcher = new EdiParserDispatcher(parsers);
-
-        // Act
         var result = dispatcher.Parse("UNB+UNOC:3", null);
-
-        // Assert
         Assert.Equal(EdiStandard.Edifact, result.Standard);
         Assert.Single(result.Segments);
     }
@@ -49,21 +45,15 @@ public class EdiParserDispatcherTests
     [Fact]
     public void Dispatch_WithNoMatch_ReturnsUnknown()
     {
-        // Arrange
         var parsers = new List<IEdiParser> { new MockParser(canParse: false) };
         var dispatcher = new EdiParserDispatcher(parsers);
-
-        // Act
         var result = dispatcher.Parse("random text", null);
-
-        // Assert
         Assert.Equal(EdiStandard.Unknown, result.Standard);
     }
 
     [Fact]
     public void Dispatch_WithMultipleParsers_UsesFirstMatch()
     {
-        // Arrange
         var parsers = new List<IEdiParser>
         {
             new MockParser(canParse: false, EdiStandard.X12),
@@ -71,25 +61,16 @@ public class EdiParserDispatcherTests
             new MockParser(canParse: true, EdiStandard.Vda)
         };
         var dispatcher = new EdiParserDispatcher(parsers);
-
-        // Act
         var result = dispatcher.Parse("UNB+UNOC:3", null);
-
-        // Assert
         Assert.Equal(EdiStandard.Edifact, result.Standard);
     }
 
     [Fact]
     public void Dispatch_EmptyText_ReturnsUnknown()
     {
-        // Arrange
         var parsers = new List<IEdiParser> { new MockParser(canParse: false) };
         var dispatcher = new EdiParserDispatcher(parsers);
-
-        // Act
         var result = dispatcher.Parse(string.Empty, null);
-
-        // Assert
         Assert.Equal(EdiStandard.Unknown, result.Standard);
     }
 }

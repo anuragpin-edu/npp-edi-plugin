@@ -7,9 +7,9 @@ namespace Edi.Core.Dictionary
     /// </summary>
     public interface IEdiDictionary
     {
-        string? GetSegmentLabel(EdiStandard standard, string segmentTag);
-        string? GetElementLabel(EdiStandard standard, string segmentTag, int position);
-        string? GetComponentLabel(EdiStandard standard, string segmentTag, int elementPosition, int componentIndex);
-        string? GetQualifierLabel(EdiStandard standard, string segmentTag, int elementPosition, string value);
+        string? GetSegmentLabel(EdiStandard standard, string? version, string segmentTag);
+        string? GetElementLabel(EdiStandard standard, string? version, string segmentTag, int position);
+        string? GetComponentLabel(EdiStandard standard, string? version, string segmentTag, int elementPosition, int componentIndex);
+        string? GetQualifierLabel(EdiStandard standard, string? version, string segmentTag, int elementPosition, string value);
     }
 }

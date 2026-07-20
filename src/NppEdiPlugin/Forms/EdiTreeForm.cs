@@ -1,47 +1,44 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Runtime.InteropServices;
-using Kbg.NppPluginNET.PluginInfrastructure;
 using Edi.Core.Model;
+using Kbg.NppPluginNET.PluginInfrastructure;
 
 namespace NppEdiPlugin.Forms
 {
-    public class EdiTreeForm : Form
+    public partial class EdiTreeForm : Form
     {
         private TreeView _treeView;
         private Label _statusLabel;
-        private readonly ScintillaGateway _scintillaGateway;
+        private ScintillaGateway _scintilla;
 
-        public EdiTreeForm(ScintillaGateway scintillaGateway)
+        public EdiTreeForm(ScintillaGateway scintilla)
         {
-            _scintillaGateway = scintillaGateway;
+            _scintilla = scintilla;
             InitializeComponent();
         }
 
         private void InitializeComponent()
         {
-            this.Text = "EDI Inspector";
-            this.ClientSize = new Size(300, 500);
+            this.Text = "EDI Tree";
+            this.Size = new Size(300, 600);
+
+            _statusLabel = new Label
+            {
+                Dock = DockStyle.Top,
+                Height = 30,
+                TextAlign = ContentAlignment.MiddleLeft,
+                Text = "No document loaded",
+                Padding = new Padding(5, 0, 0, 0)
+            };
 
             _treeView = new TreeView
             {
                 Dock = DockStyle.Fill,
-                HideSelection = false,
-                FullRowSelect = true,
-                ShowLines = true,
-                Font = new Font("Consolas", 10F)
+                Font = new Font("Consolas", 10F),
+                HideSelection = false
             };
-            _treeView.NodeMouseDoubleClick += TreeView_NodeMouseDoubleClick;
-
-            _statusLabel = new Label
-            {
-                Dock = DockStyle.Bottom,
-                Height = 25,
-                TextAlign = ContentAlignment.MiddleLeft,
-                BackColor = SystemColors.ControlLight,
-                Text = "Ready"
-            };
+            _treeView.AfterSelect += TreeView_AfterSelect;
 
             this.Controls.Add(_treeView);
             this.Controls.Add(_statusLabel);
@@ -59,7 +56,13 @@ namespace NppEdiPlugin.Forms
                 return;
             }
 
-            _statusLabel.Text = $"Parsed {document.Standard} document with {document.Segments.Count} segments.";
+            string versionStr = !string.IsNullOrEmpty(document.Version) ? $" — {document.Version}" : "";
+            _statusLabel.Text = $"Parsed {document.Standard}{versionStr} document with {document.Segments.Count} segments.";
+
+            var rootNode = new TreeNode($"{document.Standard} Interchange{versionStr}")
+            {
+                Tag = new NodeOffsets { Start = 0, End = 0 }
+            };
 
             foreach (var segment in document.Segments)
             {
@@ -77,12 +80,16 @@ namespace NppEdiPlugin.Forms
                 {
                     var elNode = new TreeNode($"[{element.Position}] {element.RawValue}")
                     {
-                        Tag = new NodeOffsets { Start = segment.StartOffset, End = segment.EndOffset } // We only highlight the segment for now
+                        Tag = new NodeOffsets { Start = segment.StartOffset, End = segment.EndOffset }
                     };
 
                     if (!string.IsNullOrEmpty(element.Label))
                     {
                         elNode.Text += $" - {element.Label}";
+                    }
+                    if (!string.IsNullOrEmpty(element.ValueDescription))
+                    {
+                        elNode.Text += $" ({element.ValueDescription})";
                     }
 
                     foreach (var component in element.Components)
@@ -96,6 +103,10 @@ namespace NppEdiPlugin.Forms
                         {
                             compNode.Text += $" - {component.Label}";
                         }
+                        if (!string.IsNullOrEmpty(component.ValueDescription))
+                        {
+                            compNode.Text += $" ({component.ValueDescription})";
+                        }
 
                         elNode.Nodes.Add(compNode);
                     }
@@ -103,22 +114,24 @@ namespace NppEdiPlugin.Forms
                     segNode.Nodes.Add(elNode);
                 }
 
-                _treeView.Nodes.Add(segNode);
+                rootNode.Nodes.Add(segNode);
             }
+
+            rootNode.Expand();
+            _treeView.Nodes.Add(rootNode);
 
             _treeView.EndUpdate();
         }
 
-        private void TreeView_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+        private void TreeView_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            if (e.Node.Tag is NodeOffsets offsets)
+            if (e.Node?.Tag is NodeOffsets offsets)
             {
-                _scintillaGateway.SetSel(offsets.Start, offsets.End);
-                
-                // Ensure visibility (scroll to selection)
-                int currentPos = _scintillaGateway.GetCurrentPos();
-                int line = _scintillaGateway.LineFromPosition(currentPos);
-                _scintillaGateway.EnsureVisibleEnforcePolicy(line);
+                if (offsets.Start > 0 || offsets.End > 0)
+                {
+                    _scintilla.SetSelection(offsets.Start, offsets.End);
+                    _scintilla.ScrollCaret();
+                }
             }
         }
 

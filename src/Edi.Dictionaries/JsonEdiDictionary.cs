@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -7,88 +9,143 @@ using Edi.Core.Model;
 
 namespace Edi.Dictionaries
 {
-    /// <summary>
-    /// An EDI dictionary loaded from an embedded JSON file.
-    /// </summary>
     public class JsonEdiDictionary : IEdiDictionary
     {
         private class JsonDictionarySchema
         {
             public string? Standard { get; set; }
-            public string? Version { get; set; }
-            public string? Provenance { get; set; }
+            public string? Release { get; set; }
             public Dictionary<string, SegmentDefinition>? Segments { get; set; }
-            public Dictionary<string, Dictionary<string, Dictionary<string, string>>>? Qualifiers { get; set; }
+            // Note: qualifiers structure could be changed by the python script.
+            // Let's use JsonElement to handle both old phase1 and new schemas if necessary, or just load as objects.
+            public JsonElement? Qualifiers { get; set; } 
         }
 
         private class SegmentDefinition
         {
-            public string? Label { get; set; }
-            public Dictionary<string, ElementDefinition>? Elements { get; set; }
+            public string? Name { get; set; } // python output has 'name'
+            public string? Label { get; set; } // phase1 output has 'Label'
+            public List<ElementDefinition>? Elements { get; set; }
         }
 
         private class ElementDefinition
         {
-            public string? Label { get; set; }
-            public Dictionary<string, string>? Components { get; set; }
+            public int Position { get; set; }
+            public string? Id { get; set; }
+            public string? Name { get; set; } // python output has 'name'
+            public string? Label { get; set; } // phase1 output has 'Label'
+            public Dictionary<string, string>? Codes { get; set; }
+            public List<ComponentDefinition>? Components { get; set; }
         }
 
-        private readonly JsonDictionarySchema? _data;
-
-        public JsonEdiDictionary()
+        private class ComponentDefinition
         {
-            var assembly = typeof(JsonEdiDictionary).Assembly;
-            var resourceName = "Edi.Dictionaries.edifact-phase1.json";
+            public int Position { get; set; }
+            public string? Id { get; set; }
+            public string? Name { get; set; }
+        }
 
-            using var stream = assembly.GetManifestResourceStream(resourceName);
-            if (stream != null)
+        private readonly ConcurrentDictionary<string, JsonDictionarySchema> _cache = new ConcurrentDictionary<string, JsonDictionarySchema>();
+
+        private JsonDictionarySchema? GetSchema(EdiStandard standard, string? release)
+        {
+            if (string.IsNullOrEmpty(release)) return null;
+            
+            var key = $"{standard}_{release}".ToLowerInvariant();
+            if (_cache.TryGetValue(key, out var cached))
             {
-                using var reader = new StreamReader(stream);
-                var jsonString = reader.ReadToEnd();
-                _data = JsonSerializer.Deserialize<JsonDictionarySchema>(jsonString, new JsonSerializerOptions
+                return cached;
+            }
+
+            var dir = Path.Combine(Path.GetDirectoryName(typeof(JsonEdiDictionary).Assembly.Location) ?? ".", "Data");
+            var filename = $"{standard.ToString().ToLowerInvariant()}_{release}.json";
+            var filePath = Path.Combine(dir, filename);
+
+            if (!File.Exists(filePath))
+            {
+                // Cache a null to prevent repeated IO misses? 
+                // Let's just return null, or cache an empty schema.
+                var empty = new JsonDictionarySchema();
+                _cache[key] = empty;
+                return empty;
+            }
+
+            try
+            {
+                var jsonString = File.ReadAllText(filePath);
+                var schema = JsonSerializer.Deserialize<JsonDictionarySchema>(jsonString, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
+                if (schema != null)
+                {
+                    _cache[key] = schema;
+                    return schema;
+                }
             }
-        }
-
-        public string? GetSegmentLabel(EdiStandard standard, string segmentTag)
-        {
-            if (standard != EdiStandard.Edifact || _data?.Segments == null) return null;
-            return _data.Segments.TryGetValue(segmentTag, out var segment) ? segment.Label : null;
-        }
-
-        public string? GetElementLabel(EdiStandard standard, string segmentTag, int position)
-        {
-            if (standard != EdiStandard.Edifact || _data?.Segments == null) return null;
-            if (_data.Segments.TryGetValue(segmentTag, out var segment) && segment.Elements != null)
+            catch
             {
-                return segment.Elements.TryGetValue(position.ToString(), out var element) ? element.Label : null;
+                // Ignore parse errors, return null
+            }
+            
+            return null;
+        }
+
+        public string? GetSegmentLabel(EdiStandard standard, string? version, string segmentTag)
+        {
+            var schema = GetSchema(standard, version);
+            if (schema?.Segments != null && schema.Segments.TryGetValue(segmentTag, out var segment))
+            {
+                return segment.Name ?? segment.Label;
             }
             return null;
         }
 
-        public string? GetComponentLabel(EdiStandard standard, string segmentTag, int elementPosition, int componentIndex)
+        public string? GetElementLabel(EdiStandard standard, string? version, string segmentTag, int position)
         {
-            if (standard != EdiStandard.Edifact || _data?.Segments == null) return null;
-            if (_data.Segments.TryGetValue(segmentTag, out var segment) && segment.Elements != null)
+            var schema = GetSchema(standard, version);
+            if (schema?.Segments != null && schema.Segments.TryGetValue(segmentTag, out var segment) && segment.Elements != null)
             {
-                if (segment.Elements.TryGetValue(elementPosition.ToString(), out var element) && element.Components != null)
+                foreach (var el in segment.Elements)
                 {
-                    return element.Components.TryGetValue(componentIndex.ToString(), out var componentLabel) ? componentLabel : null;
+                    if (el.Position == position) return el.Name ?? el.Label;
                 }
             }
             return null;
         }
 
-        public string? GetQualifierLabel(EdiStandard standard, string segmentTag, int elementPosition, string value)
+        public string? GetComponentLabel(EdiStandard standard, string? version, string segmentTag, int elementPosition, int componentIndex)
         {
-            if (standard != EdiStandard.Edifact || _data?.Qualifiers == null) return null;
-            if (_data.Qualifiers.TryGetValue(segmentTag, out var elementQualifiers))
+            // Note: componentIndex passed here is 1-based.
+            var schema = GetSchema(standard, version);
+            if (schema?.Segments != null && schema.Segments.TryGetValue(segmentTag, out var segment) && segment.Elements != null)
             {
-                if (elementQualifiers.TryGetValue(elementPosition.ToString(), out var codeList))
+                foreach (var el in segment.Elements)
                 {
-                    return codeList.TryGetValue(value, out var label) ? label : null;
+                    if (el.Position == elementPosition && el.Components != null)
+                    {
+                        var targetPos = componentIndex;
+                        foreach (var comp in el.Components)
+                        {
+                            if (comp.Position == targetPos) return comp.Name;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        public string? GetQualifierLabel(EdiStandard standard, string? version, string segmentTag, int elementPosition, string value)
+        {
+            var schema = GetSchema(standard, version);
+            if (schema?.Segments != null && schema.Segments.TryGetValue(segmentTag, out var segment) && segment.Elements != null)
+            {
+                foreach (var el in segment.Elements)
+                {
+                    if (el.Position == elementPosition && el.Codes != null)
+                    {
+                        if (el.Codes.TryGetValue(value, out var desc)) return desc;
+                    }
                 }
             }
             return null;

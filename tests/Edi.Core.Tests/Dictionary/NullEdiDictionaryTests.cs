@@ -12,7 +12,7 @@ public class NullEdiDictionaryTests
     public void GetSegmentLabel_ReturnsNull()
     {
         // Act
-        var result = _dictionary.GetSegmentLabel(EdiStandard.Edifact, "UNB");
+        var result = _dictionary.GetSegmentLabel(EdiStandard.Edifact, "D96A", "UNB");
 
         // Assert
         Assert.Null(result);
@@ -22,7 +22,7 @@ public class NullEdiDictionaryTests
     public void GetElementLabel_ReturnsNull()
     {
         // Act
-        var result = _dictionary.GetElementLabel(EdiStandard.Edifact, "UNB", 1);
+        var result = _dictionary.GetElementLabel(EdiStandard.Edifact, "D96A", "UNB", 1);
 
         // Assert
         Assert.Null(result);
@@ -32,7 +32,7 @@ public class NullEdiDictionaryTests
     public void GetComponentLabel_ReturnsNull()
     {
         // Act
-        var result = _dictionary.GetComponentLabel(EdiStandard.Edifact, "UNB", 1, 0);
+        var result = _dictionary.GetComponentLabel(EdiStandard.Edifact, "D96A", "UNB", 1, 0);
 
         // Assert
         Assert.Null(result);
@@ -42,7 +42,7 @@ public class NullEdiDictionaryTests
     public void GetQualifierLabel_ReturnsNull()
     {
         // Act
-        var result = _dictionary.GetQualifierLabel(EdiStandard.Edifact, "NAD", 1, "BY");
+        var result = _dictionary.GetQualifierLabel(EdiStandard.Edifact, "D96A", "NAD", 1, "BY");
 
         // Assert
         Assert.Null(result);

@@ -65,7 +65,7 @@ public class EdiFormatterDispatcherTests
     {
         var dispatcher = new EdiFormatterDispatcher(new[] { new MockFormatter(true) });
 
-        var result = dispatcher.Prettify(null);
+        var result = dispatcher.Prettify(null!);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("No text", result.ErrorMessage);

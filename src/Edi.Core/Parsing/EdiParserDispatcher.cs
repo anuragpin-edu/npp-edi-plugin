@@ -21,7 +21,7 @@ namespace Edi.Core.Parsing
         {
             if (string.IsNullOrWhiteSpace(text))
             {
-                return new EdiDocument(EdiStandard.Unknown, new List<EdiSegment>());
+                return new EdiDocument(EdiStandard.Unknown, null, null, new List<EdiSegment>());
             }
 
             foreach (var parser in _parsers)
@@ -32,7 +32,7 @@ namespace Edi.Core.Parsing
                 }
             }
 
-            return new EdiDocument(EdiStandard.Unknown, new List<EdiSegment>());
+            return new EdiDocument(EdiStandard.Unknown, null, null, new List<EdiSegment>());
         }
     }
 }

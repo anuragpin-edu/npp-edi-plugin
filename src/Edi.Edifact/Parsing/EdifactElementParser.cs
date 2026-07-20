@@ -29,7 +29,7 @@ namespace Edi.Edifact.Parsing
         public static List<EdiElement> ParseElements(
             string segmentBody,
             EdiDelimiters delimiters,
-            IEdiDictionary? dictionary,
+            IEdiDictionary? dictionary, string? version,
             EdiStandard standard,
             string segmentTag)
         {
@@ -61,17 +61,27 @@ namespace Edi.Edifact.Parsing
                     for (int j = 0; j < componentStrings.Count; j++)
                     {
                         string? componentLabel = dictionary?.GetComponentLabel(
-                            standard, segmentTag, position, j);
-                        components.Add(new EdiComponent(j, componentStrings[j], componentLabel));
+                            standard, version, segmentTag, position, j);
+                        string? compValueDesc = dictionary?.GetQualifierLabel(
+                            standard, version, segmentTag, position, componentStrings[j]);
+                        components.Add(new EdiComponent(j, componentStrings[j], componentLabel, compValueDesc));
                     }
                 }
 
-                string? elementLabel = dictionary?.GetElementLabel(standard, segmentTag, position);
+                string? elementLabel = dictionary?.GetElementLabel(standard, version, segmentTag, position);
+                string? elementValueDesc = null;
+                
+                // If it's a simple element without components, check if its value has a description.
+                if (components == null)
+                {
+                    elementValueDesc = dictionary?.GetQualifierLabel(standard, version, segmentTag, position, rawElement);
+                }
 
                 elements.Add(new EdiElement(
                     position,
                     rawElement,
                     elementLabel,
+                    elementValueDesc,
                     components != null
                         ? (IReadOnlyList<EdiComponent>)components
                         : null));

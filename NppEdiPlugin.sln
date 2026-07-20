@@ -1,9 +1,8 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Edi.Core", "src\Edi.Core\Edi.Core.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Edi.Edifact", "src\Edi.Edifact\Edi.Edifact.csproj", "{B2C3D4E5-F6A7-8901-BCDE-F12345678901}"
@@ -17,6 +16,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Edi.Dictionaries.Tests", "tests\Edi.Dictionaries.Tests\Edi.Dictionaries.Tests.csproj", "{F6A7B8C9-D0E1-2345-F012-456789012345}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NppEdiPlugin", "src\NppEdiPlugin\NppEdiPlugin.csproj", "{EB8FC3A3-93E8-457B-B281-FAFA5119611A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1F7D8459-65CC-4625-8A28-CFEC7397256F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Edi.X12", "src\Edi.X12\Edi.X12.csproj", "{28C7DA9D-EDDB-4FB1-A012-75DA15351AE2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{819B4CD0-70D7-41A3-A5FD-E8F9F615C746}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Edi.X12.Tests", "tests\Edi.X12.Tests\Edi.X12.Tests.csproj", "{14E05D0A-070C-486D-AA4B-AB849A0B6C6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,7 +55,17 @@ Global
 		{F6A7B8C9-D0E1-2345-F012-456789012345}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6A7B8C9-D0E1-2345-F012-456789012345}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6A7B8C9-D0E1-2345-F012-456789012345}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28C7DA9D-EDDB-4FB1-A012-75DA15351AE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28C7DA9D-EDDB-4FB1-A012-75DA15351AE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28C7DA9D-EDDB-4FB1-A012-75DA15351AE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28C7DA9D-EDDB-4FB1-A012-75DA15351AE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14E05D0A-070C-486D-AA4B-AB849A0B6C6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14E05D0A-070C-486D-AA4B-AB849A0B6C6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14E05D0A-070C-486D-AA4B-AB849A0B6C6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14E05D0A-070C-486D-AA4B-AB849A0B6C6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
-EndProject("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NppEdiPlugin", "src\NppEdiPlugin\NppEdiPlugin.csproj", "{EB8FC3A3-93E8-457B-B281-FAFA5119611A}"
-EndProject
-Global
+	GlobalSection(NestedProjects) = preSolution
+		{28C7DA9D-EDDB-4FB1-A012-75DA15351AE2} = {1F7D8459-65CC-4625-8A28-CFEC7397256F}
+		{14E05D0A-070C-486D-AA4B-AB849A0B6C6C} = {819B4CD0-70D7-41A3-A5FD-E8F9F615C746}
+	EndGlobalSection
+EndGlobal

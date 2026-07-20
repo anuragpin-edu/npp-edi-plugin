@@ -9,6 +9,8 @@ using Edi.Core.Model;
 using Edi.Core.Parsing;
 using Edi.Edifact.Formatting;
 using Edi.Edifact.Parsing;
+using Edi.X12.Formatting;
+using Edi.X12.Parsing;
 using Edi.Dictionaries;
 
 namespace Kbg.NppPluginNET
@@ -36,8 +38,8 @@ namespace Kbg.NppPluginNET
         static NotepadPPGateway notepad = new NotepadPPGateway();
 
         // Generic dispatcher setup — add new parsers/formatters here as standards are implemented.
-        static EdiParserDispatcher parserDispatcher = new EdiParserDispatcher(new IEdiParser[] { new EdifactParser() });
-        static EdiFormatterDispatcher formatterDispatcher = new EdiFormatterDispatcher(new IEdiFormatter[] { new EdifactFormatter() });
+        static EdiParserDispatcher parserDispatcher = new EdiParserDispatcher(new IEdiParser[] { new EdifactParser(), new X12Parser() });
+        static EdiFormatterDispatcher formatterDispatcher = new EdiFormatterDispatcher(new IEdiFormatter[] { new EdifactFormatter(), new X12Formatter() });
         static JsonEdiDictionary dictionary = new JsonEdiDictionary();
 
         public static void OnNotification(ScNotification notification)
@@ -90,7 +92,7 @@ namespace Kbg.NppPluginNET
             {
                 MessageBox.Show(
                     "Could not detect a supported EDI standard in the current document.\n\n" +
-                    "Supported standards: EDIFACT",
+                    "Supported standards: EDIFACT, X12",
                     PluginName,
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
@@ -177,7 +179,7 @@ namespace Kbg.NppPluginNET
         {
             MessageBox.Show(
                 "NppEdiPlugin — EDI Inspector for Notepad++\n" +
-                "Supports: EDIFACT (X12 and VDA planned)\n\n" +
+                "Supports: EDIFACT, X12 (VDA planned)\n\n" +
                 "Phase 2 — Generic dispatchers",
                 "About",
                 MessageBoxButtons.OK,
