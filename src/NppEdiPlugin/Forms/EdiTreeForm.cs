@@ -130,6 +130,7 @@ namespace NppEdiPlugin.Forms
                 if (offsets.Start > 0 || offsets.End > 0)
                 {
                     _scintilla.SetSelection(offsets.Start, offsets.End);
+                    _scintilla.ScrollCaret();
                 }
             }
         }

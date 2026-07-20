@@ -7,7 +7,7 @@ namespace Edi.Core.Dictionary
     {
         public static string Normalize(EdiStandard standard, string? rawVersion)
         {
-            if (string.IsNullOrWhiteSpace(rawVersion))
+            if (rawVersion == null || string.IsNullOrWhiteSpace(rawVersion))
                 return string.Empty;
 
             rawVersion = rawVersion.Trim();

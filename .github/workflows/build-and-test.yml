@@ -38,4 +38,6 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: NppEdiPlugin-x64
-        path: src/NppEdiPlugin/bin/Release-x64/NppEdiPlugin.dll
+        path: |
+          src/NppEdiPlugin/bin/Release-x64/NppEdiPlugin.dll
+          src/NppEdiPlugin/bin/Release-x64/Data/
