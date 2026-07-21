@@ -34,10 +34,68 @@ jobs:
     - name: Build NppEdiPlugin DLL (MSBuild)
       run: msbuild src\NppEdiPlugin\NppEdiPlugin.csproj /p:Configuration=Release /p:Platform=x64
 
+    - name: Validate Package Constraints
+      shell: pwsh
+      run: |
+        $outDir = "src\NppEdiPlugin\bin\Release-x64"
+        
+        # 1. Check Edi.* DLLs
+        $expectedEdiDlls = @("Edi.Core.dll", "Edi.Edifact.dll", "Edi.X12.dll", "Edi.Dictionaries.dll")
+        foreach ($dll in $expectedEdiDlls) {
+          if (-not (Test-Path "$outDir\$dll")) {
+            Write-Error "Missing required DLL: $dll"
+            exit 1
+          }
+        }
+        
+        # 2. Check Data directory and JSON files
+        $expectedDataFiles = @("edifact_D96A.json", "x12_00401.json", "x12_00501.json", "import-manifest.json")
+        foreach ($json in $expectedDataFiles) {
+          if (-not (Test-Path "$outDir\Data\$json")) {
+            Write-Error "Missing Data file: $json"
+            exit 1
+          }
+        }
+        
+        # 3. Check x64 architecture of NppEdiPlugin.dll
+        # PE header machine type at offset 0x3C points to PE signature, followed by Machine at offset 4
+        $bytes = [System.IO.File]::ReadAllBytes("$outDir\NppEdiPlugin.dll")
+        $peHeaderOffset = [System.BitConverter]::ToInt32($bytes, 0x3C)
+        $machine = [System.BitConverter]::ToUInt16($bytes, $peHeaderOffset + 4)
+        if ($machine -ne 0x8664) {
+          Write-Error "NppEdiPlugin.dll is not x64 (Machine code $machine)"
+          exit 1
+        }
+        
+        # 4. Check exported native functions
+        # We can dumpbin /EXPORTS and grep for them. dumpbin is available in Developer Command Prompt,
+        # but we can use dumpbin in pwsh since MSBuild is setup.
+        $dumpbin = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+        $dumpbinPath = "$dumpbin\VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe" | Resolve-Path | Select-Object -ExpandProperty Path -First 1
+        
+        $exports = & $dumpbinPath /EXPORTS "$outDir\NppEdiPlugin.dll"
+        $expectedExports = @("isUnicode", "setInfo", "getFuncsArray", "messageProc", "getName", "beNotified")
+        foreach ($exp in $expectedExports) {
+          if (-not ($exports -match $exp)) {
+            Write-Error "Missing export: $exp"
+            exit 1
+          }
+        }
+        
+        # 5. Check managed dependency resolution closure
+        # We just ensure the common Nuget output exists.
+        $sysTextJson = "$outDir\System.Text.Json.dll"
+        if (-not (Test-Path $sysTextJson)) {
+          Write-Error "Missing non-framework managed dependency: System.Text.Json.dll"
+          exit 1
+        }
+        
+        Write-Output "All package constraints passed successfully."
+
     - name: Upload NppEdiPlugin Artifact
       uses: actions/upload-artifact@v4
       with:
         name: NppEdiPlugin-x64
         path: |
-          src/NppEdiPlugin/bin/Release-x64/NppEdiPlugin.dll
+          src/NppEdiPlugin/bin/Release-x64/*.dll
           src/NppEdiPlugin/bin/Release-x64/Data/

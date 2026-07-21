@@ -1,9 +1,10 @@
 # Manual Smoke Test Results
 
 ## Environment
-*   **Windows Version:** [e.g., Windows 11 23H2]
-*   **Notepad++ Version:** [e.g., v8.6.5]
-*   **Notepad++ Architecture:** [e.g., 64-bit x64]
+*   **Windows Version:** Windows 11 Home 25H2 (OS Build: 26200.8655)
+*   **Notepad++ Version:** 8.9.7 (64-bit)
+*   **Admin Mode:** OFF
+*   **Local Conf Mode:** OFF
 *   **Installation Type:** [e.g., Portable / Standard]
 *   **Plugin Path:** [e.g., C:\Program Files\Notepad++\plugins\NppEdiPlugin]
 *   **NppEdiPlugin-x64.zip SHA-256:** `c40e99aa7478e5331b562f07000adec142cf7e49422bcd63b1fdcdb85dff1cee`
@@ -15,7 +16,7 @@
 
 | Test ID | Standard | Version | Test Action | Expected Result | Actual Result | Status | Notes | Screenshot |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **LOD-01** | N/A | N/A | Start Notepad++ after install | Notepad++ starts without error dialogs. | | Not executed | | |
+| **LOD-01** | N/A | N/A | Start Notepad++ after install | Notepad++ starts without error dialogs. | | **FAIL** (Original package) | | |
 | **LOD-02** | N/A | N/A | Check Plugins menu | NppEdiPlugin appears in Plugins menu. | | Not executed | | |
 | **LOD-03** | N/A | N/A | Open EDI Tree panel | The EDI Tree panel opens/closes correctly. | | Not executed | | |
 | **LOD-04** | N/A | N/A | Restart Notepad++ | No duplicate menu commands or panels appear. | | Not executed | | |
