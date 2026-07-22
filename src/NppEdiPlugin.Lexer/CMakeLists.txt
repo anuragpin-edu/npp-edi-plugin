@@ -9,15 +9,15 @@ include(FetchContent)
 # Pin Scintilla 5.6.4
 FetchContent_Declare(
     scintilla
-    URL "https://www.scintilla.org/scintilla564.zip"
+    URL "https://prdownloads.sourceforge.net/scintilla/scintilla564.zip?download"
     URL_HASH SHA256=3ffd69532649556978cdbe7ebe1293d9cf3259b290a7974a71e77a32bac50e12
 )
 
 # Pin Lexilla 5.5.1
 FetchContent_Declare(
     lexilla
-    URL "https://www.scintilla.org/lexilla551.zip"
-    URL_HASH SHA256=0c3e1d940ac6badf9056d1e6d82506c06b3735916d02827524a32ff84154fb8b
+    URL "https://github.com/ScintillaOrg/lexilla/archive/refs/tags/rel-5-5-1.zip"
+    URL_HASH SHA256=5c147f927927b35c55c630ef3a9affd5708400a3cad80447cc1043ab9a816f31
 )
 
 FetchContent_MakeAvailable(scintilla lexilla)
