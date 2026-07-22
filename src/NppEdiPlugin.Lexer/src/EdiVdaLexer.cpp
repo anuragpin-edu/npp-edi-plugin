@@ -86,4 +86,4 @@ public:
     int SCI_METHOD PrimaryStyleFromStyle(int style) override { return style; }
 };
 
-extern "C" LexerModule lmEdiVda(SCLEX_AUTOMATIC, []() -> ILexer5* { return new LexerVda(); }, "edi_vda", nullptr);
+extern const LexerModule lmEdiVda(SCLEX_AUTOMATIC, []() -> ILexer5* { return new LexerVda(); }, "edi_vda", nullptr);

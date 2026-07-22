@@ -122,4 +122,4 @@ private:
     }
 };
 
-extern "C" LexerModule lmEdiEdifact(SCLEX_AUTOMATIC, []() -> ILexer5* { return new LexerEdifact(); }, "edi_edifact", nullptr);
+extern const LexerModule lmEdiEdifact(SCLEX_AUTOMATIC, []() -> ILexer5* { return new LexerEdifact(); }, "edi_edifact", nullptr);

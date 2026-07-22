@@ -123,4 +123,4 @@ private:
     }
 };
 
-extern "C" LexerModule lmEdiX12(SCLEX_AUTOMATIC, []() -> ILexer5* { return new LexerX12(); }, "edi_x12", nullptr);
+extern const LexerModule lmEdiX12(SCLEX_AUTOMATIC, []() -> ILexer5* { return new LexerX12(); }, "edi_x12", nullptr);
