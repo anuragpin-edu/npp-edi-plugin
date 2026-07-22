@@ -5,10 +5,18 @@
 *   **Notepad++ Version:** 8.9.7 (64-bit)
 *   **Admin Mode:** OFF
 *   **Local Conf Mode:** OFF
-*   **Installation Type:** [e.g., Portable / Standard]
-*   **Plugin Path:** [e.g., C:\Program Files\Notepad++\plugins\NppEdiPlugin]
-*   **NppEdiPlugin-x64.zip SHA-256:** `c40e99aa7478e5331b562f07000adec142cf7e49422bcd63b1fdcdb85dff1cee`
-*   **NppEdiPlugin.dll SHA-256:** `7587e7af1a76aa71f0f661eaf2ac3ba44bc7f68f3ffa64fc6633de12581123cc`
+*   **Multi-instance Mode:** monoInst
+*   **Installation Type:** Standard
+*   **Plugin Path:** `C:\Program Files\Notepad++\plugins\NppEdiPlugin\`
+*   **Bundled plugins only:** mimeTools, NppConverter, NppExport
+
+## Package History
+
+| Package | NppEdiPlugin.dll SHA-256 | ZIP SHA-256 | LOD-01 Result |
+| :--- | :--- | :--- | :--- |
+| Original (main `29758724385`) | `7587e7af1a76aa71f0f661eaf2ac3ba44bc7f68f3ffa64fc6633de12581123cc` | `c40e99aa7478e5331b562f07000adec142cf7e49422bcd63b1fdcdb85dff1cee` | **FAIL** — DLL missing dependency closure |
+| Multi-DLL PR#3 (`29870795249`) | `cc5d0f864e77dc7059e0e84ca8086c414ef8c3f19f8d8cdd60409aa109b89f3f` | `80885c3dcaf8663d99c17f399441d1ae5836ad5d31ff12ffabdac75c4dce21a8` | **FAIL** — "not compatible" — probable exception in setInfo() / eager static init |
+| Diagnostic PR#3 (fix/plugin-load-and-runtime-package) | _TBD after CI_ | _TBD_ | Pending install |
 
 ## Results Table
 
@@ -16,10 +24,11 @@
 
 | Test ID | Standard | Version | Test Action | Expected Result | Actual Result | Status | Notes | Screenshot |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **LOD-01** | N/A | N/A | Start Notepad++ after install | Notepad++ starts without error dialogs. | | **FAIL** (Original package) | | |
-| **LOD-02** | N/A | N/A | Check Plugins menu | NppEdiPlugin appears in Plugins menu. | | Not executed | | |
-| **LOD-03** | N/A | N/A | Open EDI Tree panel | The EDI Tree panel opens/closes correctly. | | Not executed | | |
-| **LOD-04** | N/A | N/A | Restart Notepad++ | No duplicate menu commands or panels appear. | | Not executed | | |
+| **LOD-01** | N/A | N/A | Install original package (single DLL), start Notepad++ | Plugin loads, menu appears | "Failed to load" error | **FAIL** | Missing dependency DLLs |
+| **LOD-01b** | N/A | N/A | Install multi-DLL PR#3 package, start Notepad++ | Plugin loads, menu appears | "not compatible" error | **FAIL** | Exception likely in setInfo() eager static init |
+| **LOD-02** | N/A | N/A | Check Plugins menu | NppEdiPlugin appears in Plugins menu. | | **BLOCKED** — LOD-01 unresolved | | |
+| **LOD-03** | N/A | N/A | Open EDI Tree panel | The EDI Tree panel opens/closes correctly. | | **BLOCKED** | | |
+| **LOD-04** | N/A | N/A | Restart Notepad++ | No duplicate menu commands or panels appear. | | **BLOCKED** | | |
 | **NAV-01** | EDIFACT | D96A | Select segment in tree | Highlights the source segment. | | Not executed | | |
 | **NAV-02** | X12 | 00501 | Select off-screen segment | Scrolls it into view. | | Not executed | | |
 | **NAV-03** | X12 | 00501 | Repeated navigation | Does not throw an exception. | | Not executed | | |

@@ -34,6 +34,18 @@ jobs:
     - name: Build NppEdiPlugin DLL (MSBuild)
       run: msbuild src\NppEdiPlugin\NppEdiPlugin.csproj /p:Configuration=Release /p:Platform=x64
 
+    - name: Native Load Test (isUnicode + getName)
+      shell: pwsh
+      run: |
+        $outDir = "src\NppEdiPlugin\bin\Release-x64"
+        $dllPath = "$outDir\NppEdiPlugin.dll"
+        Write-Output "Running native load test on: $dllPath"
+        & .\tools\Test-NativePluginLoad.ps1 -PluginDll $dllPath
+        if ($LASTEXITCODE -ne 0) {
+          Write-Error "Native load test failed (exit code $LASTEXITCODE)"
+          exit 1
+        }
+
     - name: Validate Package Constraints
       shell: pwsh
       run: |
@@ -57,40 +69,66 @@ jobs:
           }
         }
         
-        # 3. Check x64 architecture of NppEdiPlugin.dll
-        # PE header machine type at offset 0x3C points to PE signature, followed by Machine at offset 4
+        # 3. Check x64 architecture of NppEdiPlugin.dll via PE header
         $bytes = [System.IO.File]::ReadAllBytes("$outDir\NppEdiPlugin.dll")
         $peHeaderOffset = [System.BitConverter]::ToInt32($bytes, 0x3C)
         $machine = [System.BitConverter]::ToUInt16($bytes, $peHeaderOffset + 4)
         if ($machine -ne 0x8664) {
-          Write-Error "NppEdiPlugin.dll is not x64 (Machine code $machine)"
+          Write-Error "NppEdiPlugin.dll is not x64 (Machine code 0x$($machine.ToString('X')))"
           exit 1
         }
+        Write-Output "  Architecture: x64 (machine=0x8664) OK"
         
-        # 4. Check exported native functions
-        # We can dumpbin /EXPORTS and grep for them. dumpbin is available in Developer Command Prompt,
-        # but we can use dumpbin in pwsh since MSBuild is setup.
-        $dumpbin = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-        $dumpbinPath = "$dumpbin\VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe" | Resolve-Path | Select-Object -ExpandProperty Path -First 1
+        # 4. Check exported native functions via dumpbin
+        # Locate dumpbin.exe from vswhere
+        $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" `
+          -latest -products * `
+          -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+          -property installationPath 2>$null
+        if ($vsPath) {
+          $dumpbinCandidates = Get-ChildItem "$vsPath\VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe" -ErrorAction SilentlyContinue
+          if ($dumpbinCandidates) {
+            $dumpbinExe = $dumpbinCandidates[0].FullName
+            $exports = & $dumpbinExe /EXPORTS "$outDir\NppEdiPlugin.dll" 2>&1
+            $expectedExports = @("isUnicode","setInfo","getFuncsArray","messageProc","getName","beNotified")
+            foreach ($exp in $expectedExports) {
+              if (-not ($exports | Select-String -SimpleMatch $exp -Quiet)) {
+                Write-Error "Missing Notepad++ export: $exp"
+                exit 1
+              }
+            }
+            Write-Output "  All 6 Notepad++ exports verified via dumpbin."
+          } else {
+            Write-Warning "dumpbin.exe not found under VS tools path; skipping dumpbin export check."
+          }
+        } else {
+          Write-Warning "vswhere did not return a VS path; skipping dumpbin export check."
+        }
         
-        $exports = & $dumpbinPath /EXPORTS "$outDir\NppEdiPlugin.dll"
-        $expectedExports = @("isUnicode", "setInfo", "getFuncsArray", "messageProc", "getName", "beNotified")
-        foreach ($exp in $expectedExports) {
-          if (-not ($exports -match $exp)) {
-            Write-Error "Missing export: $exp"
+        # 5. Check managed dependency closure (must be present beside main DLL)
+        $requiredDeps = @(
+          "System.Text.Json.dll",
+          "System.Memory.dll",
+          "Microsoft.Bcl.AsyncInterfaces.dll"
+        )
+        foreach ($dep in $requiredDeps) {
+          if (-not (Test-Path "$outDir\$dep")) {
+            Write-Error "Missing non-framework managed dependency: $dep"
             exit 1
           }
         }
         
-        # 5. Check managed dependency resolution closure
-        # We just ensure the common Nuget output exists.
-        $sysTextJson = "$outDir\System.Text.Json.dll"
-        if (-not (Test-Path $sysTextJson)) {
-          Write-Error "Missing non-framework managed dependency: System.Text.Json.dll"
-          exit 1
-        }
-        
         Write-Output "All package constraints passed successfully."
+
+    - name: List complete package directory
+      shell: pwsh
+      run: |
+        $outDir = "src\NppEdiPlugin\bin\Release-x64"
+        Write-Output "=== Complete Release-x64 directory listing ==="
+        Get-ChildItem $outDir -Recurse | Sort-Object FullName |
+          Select-Object @{N='Path';E={$_.FullName -replace [regex]::Escape((Get-Location).Path+'\')}},
+                        @{N='Bytes';E={if ($_.PSIsContainer) {'<DIR>'} else {$_.Length}}} |
+          Format-Table -AutoSize
 
     - name: Upload NppEdiPlugin Artifact
       uses: actions/upload-artifact@v4
