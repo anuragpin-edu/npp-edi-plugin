@@ -3,7 +3,10 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Kbg.NppPluginNET.PluginInfrastructure;
-using NppEdiPlugin.Forms;
+
+// Edi.* types are referenced only inside method bodies — never in static field
+// initialisers or static constructors — so they are not loaded until the first
+// plugin command is actually invoked by the user.
 using Edi.Core.Formatting;
 using Edi.Core.Model;
 using Edi.Core.Parsing;
@@ -12,67 +15,119 @@ using Edi.Edifact.Parsing;
 using Edi.X12.Formatting;
 using Edi.X12.Parsing;
 using Edi.Dictionaries;
+using NppEdiPlugin.Forms;
 
 namespace Kbg.NppPluginNET
 {
     class Main
     {
         internal const string PluginName = "NppEdiPlugin";
-        
-        static string iniFilePath = null;
-        static EdiTreeForm frmMyDlg = null;
-        static int idMyDlg = -1;
-        static Bitmap tbBmp = new Bitmap(16, 16); 
-        static Bitmap tbBmp_tbTab = new Bitmap(16, 16);
-        static Icon tbIcon = null;
-        
+
+        // ── Fields that can be set only by Notepad++ calls — never initialised eagerly ──
+        private static EdiTreeForm      _treeForm;
+        private static int              _idMyDlg = -1;
+
+        // Kept for toolbar registration; allocate on demand
+        private static Bitmap _tbBmp;
+        private static Bitmap _tbBmpTab;
+
+        // Suppresses CS0414 on iniFilePath / tbIcon which were in original template
+        #pragma warning disable 0414
+        private static readonly string  _iniFilePath   = null;
+        private static readonly Icon    _tbIcon        = null;
+        #pragma warning restore 0414
+
+        // ── Lazy EDI runtime objects — created on first use, not during setInfo ──
+        private static EdiParserDispatcher    _parserDispatcher;
+        private static EdiFormatterDispatcher _formatterDispatcher;
+        private static JsonEdiDictionary      _dictionary;
+        private static ScintillaGateway       _scintilla;
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Lazy-accessor helpers
+        // ─────────────────────────────────────────────────────────────────────
+        private static ScintillaGateway GetScintilla()
+        {
+            if (_scintilla == null)
+                _scintilla = new ScintillaGateway(PluginBase.GetCurrentScintilla());
+            return _scintilla;
+        }
+
+        private static EdiParserDispatcher GetParserDispatcher()
+        {
+            if (_parserDispatcher == null)
+                _parserDispatcher = new EdiParserDispatcher(
+                    new IEdiParser[] { new EdifactParser(), new X12Parser() });
+            return _parserDispatcher;
+        }
+
+        private static EdiFormatterDispatcher GetFormatterDispatcher()
+        {
+            if (_formatterDispatcher == null)
+                _formatterDispatcher = new EdiFormatterDispatcher(
+                    new IEdiFormatter[] { new EdifactFormatter(), new X12Formatter() });
+            return _formatterDispatcher;
+        }
+
+        private static JsonEdiDictionary GetDictionary()
+        {
+            if (_dictionary == null)
+                _dictionary = new JsonEdiDictionary();
+            return _dictionary;
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
         // Dummy properties to satisfy NppCSharpPluginPack Utils dependencies
-        public static string PluginConfigDirectory { get; set; }
-        public static bool isShuttingDown = false;
-        public static Form selectionRememberingForm = null;
-        public static int IdCloseHtmlTag = -1;
-        public static void RestyleEverything() { }
-        internal static void SetToolBarIcons() { SetToolBarIcon(); }
+        // ─────────────────────────────────────────────────────────────────────
+        public static string PluginConfigDirectory     { get; set; }
+        public static bool   isShuttingDown            = false;
+        public static Form   selectionRememberingForm  = null;
+        public static int    IdCloseHtmlTag            = -1;
+        public static void   RestyleEverything()       { }
+        internal static void SetToolBarIcons()         { SetToolBarIcon(); }
 
-        static ScintillaGateway scintilla = new ScintillaGateway(PluginBase.GetCurrentScintilla());
-        static NotepadPPGateway notepad = new NotepadPPGateway();
-
-        // Generic dispatcher setup — add new parsers/formatters here as standards are implemented.
-        static EdiParserDispatcher parserDispatcher = new EdiParserDispatcher(new IEdiParser[] { new EdifactParser(), new X12Parser() });
-        static EdiFormatterDispatcher formatterDispatcher = new EdiFormatterDispatcher(new IEdiFormatter[] { new EdifactFormatter(), new X12Formatter() });
-        static JsonEdiDictionary dictionary = new JsonEdiDictionary();
-
+        // ─────────────────────────────────────────────────────────────────────
+        // Notepad++ lifecycle
+        // ─────────────────────────────────────────────────────────────────────
         public static void OnNotification(ScNotification notification)
-        {  
-            // Can be used to hook into Notepad++ events
+        {
+            // Hook into Notepad++ events here as needed
         }
 
         internal static void CommandMenuInit()
         {
-            PluginBase.SetCommand(0, "Parse EDI", ParseEdi, new ShortcutKey(false, false, false, Keys.None));
-            PluginBase.SetCommand(1, "Prettify EDI", PrettifyEdi, new ShortcutKey(false, false, false, Keys.None));
-            PluginBase.SetCommand(2, "Minify EDI", MinifyEdi, new ShortcutKey(false, false, false, Keys.None));
+            // Only register delegates — no Edi.* object construction here.
+            PluginBase.SetCommand(0, "Parse EDI",          ParseEdi,        new ShortcutKey(false, false, false, Keys.None));
+            PluginBase.SetCommand(1, "Prettify EDI",       PrettifyEdi,     new ShortcutKey(false, false, false, Keys.None));
+            PluginBase.SetCommand(2, "Minify EDI",         MinifyEdi,       new ShortcutKey(false, false, false, Keys.None));
             PluginBase.SetCommand(3, "Toggle EDI Tree Panel", ToggleTreePanel, new ShortcutKey(false, false, false, Keys.None));
-            idMyDlg = 3; // Used for dockable panel tracking
-            PluginBase.SetCommand(4, "---", null);
+            _idMyDlg = 3;
+            PluginBase.SetCommand(4, "---",                null);
             PluginBase.SetCommand(5, "About NppEdiPlugin", About);
         }
 
         internal static void SetToolBarIcon()
         {
-            // Register toolbar icon if needed
+            if (_tbBmp == null) _tbBmp = new Bitmap(16, 16);
             toolbarIcons tbIcons = new toolbarIcons();
-            tbIcons.hToolbarBmp = tbBmp.GetHbitmap();
+            tbIcons.hToolbarBmp = _tbBmp.GetHbitmap();
             IntPtr pTbIcons = Marshal.AllocHGlobal(Marshal.SizeOf(tbIcons));
             Marshal.StructureToPtr(tbIcons, pTbIcons, false);
-            Win32.SendMessage(PluginBase.nppData._nppHandle, (uint) NppMsg.NPPM_ADDTOOLBARICON, PluginBase._funcItems.Items[idMyDlg]._cmdID, pTbIcons);
+            Win32.SendMessage(PluginBase.nppData._nppHandle,
+                              (uint)NppMsg.NPPM_ADDTOOLBARICON,
+                              PluginBase._funcItems.Items[_idMyDlg]._cmdID,
+                              pTbIcons);
             Marshal.FreeHGlobal(pTbIcons);
         }
 
         internal static void PluginCleanUp()
         {
-            // Clean up
+            // Nothing to clean up yet
         }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Plugin commands — EDI runtime is constructed here, on first use only
+        // ─────────────────────────────────────────────────────────────────────
 
         /// <summary>
         /// Reads the active Scintilla buffer and parses it using the generic parser dispatcher.
@@ -80,98 +135,117 @@ namespace Kbg.NppPluginNET
         /// </summary>
         internal static void ParseEdi()
         {
-            if (frmMyDlg == null || !frmMyDlg.Visible)
+            try
             {
-                ToggleTreePanel();
-            }
+                if (_treeForm == null || !_treeForm.Visible)
+                    ToggleTreePanel();
 
-            string text = GetEditorText();
-            var document = parserDispatcher.Parse(text, dictionary);
-            
-            if (document.Standard == EdiStandard.Unknown)
-            {
-                MessageBox.Show(
-                    "Could not detect a supported EDI standard in the current document.\n\n" +
-                    "Supported standards: EDIFACT, X12",
-                    PluginName,
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-                return;
-            }
+                string text   = GetEditorText();
+                var    doc    = GetParserDispatcher().Parse(text, GetDictionary());
 
-            if (frmMyDlg != null)
+                if (doc.Standard == EdiStandard.Unknown)
+                {
+                    MessageBox.Show(
+                        "Could not detect a supported EDI standard in the current document.\n\n" +
+                        "Supported standards: EDIFACT, X12",
+                        PluginName,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                _treeForm?.RenderDocument(doc);
+            }
+            catch (Exception ex)
             {
-                frmMyDlg.RenderDocument(document);
+                HandleCommandException(ex, "Parse EDI");
             }
         }
 
         /// <summary>
-        /// Reads the active Scintilla buffer, prettifies it using the formatter dispatcher,
-        /// and replaces the buffer contents on success.
+        /// Reads the active Scintilla buffer, prettifies it, and replaces the buffer contents.
         /// </summary>
         internal static void PrettifyEdi()
         {
-            string text = GetEditorText();
-            var result = formatterDispatcher.Prettify(text);
-
-            if (!result.IsSuccess)
+            try
             {
-                MessageBox.Show(
-                    result.ErrorMessage,
-                    PluginName,
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-                return;
-            }
+                string text   = GetEditorText();
+                var    result = GetFormatterDispatcher().Prettify(text);
 
-            ReplaceEditorText(result.FormattedText);
+                if (!result.IsSuccess)
+                {
+                    MessageBox.Show(result.ErrorMessage, PluginName,
+                                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                ReplaceEditorText(result.FormattedText);
+            }
+            catch (Exception ex)
+            {
+                HandleCommandException(ex, "Prettify EDI");
+            }
         }
 
         /// <summary>
-        /// Reads the active Scintilla buffer, minifies it using the formatter dispatcher,
-        /// and replaces the buffer contents on success.
+        /// Reads the active Scintilla buffer, minifies it, and replaces the buffer contents.
         /// </summary>
         internal static void MinifyEdi()
         {
-            string text = GetEditorText();
-            var result = formatterDispatcher.Minify(text);
-
-            if (!result.IsSuccess)
+            try
             {
-                MessageBox.Show(
-                    result.ErrorMessage,
-                    PluginName,
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-                return;
-            }
+                string text   = GetEditorText();
+                var    result = GetFormatterDispatcher().Minify(text);
 
-            ReplaceEditorText(result.FormattedText);
+                if (!result.IsSuccess)
+                {
+                    MessageBox.Show(result.ErrorMessage, PluginName,
+                                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                ReplaceEditorText(result.FormattedText);
+            }
+            catch (Exception ex)
+            {
+                HandleCommandException(ex, "Minify EDI");
+            }
         }
 
         internal static void ToggleTreePanel()
         {
-            if (frmMyDlg == null)
+            try
             {
-                frmMyDlg = new EdiTreeForm(scintilla);
+                if (_treeForm == null)
+                {
+                    if (_tbBmpTab == null) _tbBmpTab = new Bitmap(16, 16);
+                    _treeForm = new EdiTreeForm(GetScintilla());
 
-                NppTbData _nppTbData = new NppTbData();
-                _nppTbData.hClient = frmMyDlg.Handle;
-                _nppTbData.pszName = "EDI Inspector";
-                _nppTbData.dlgID = idMyDlg;
-                // User requested LEFT side docking
-                _nppTbData.uMask = NppTbMsg.DWS_DF_CONT_LEFT | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR;
-                _nppTbData.hIconTab = (uint)tbBmp_tbTab.GetHicon();
-                _nppTbData.pszModuleName = PluginName;
-                IntPtr _ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(_nppTbData));
-                Marshal.StructureToPtr(_nppTbData, _ptrNppTbData, false);
+                    NppTbData nppTbData = new NppTbData();
+                    nppTbData.hClient     = _treeForm.Handle;
+                    nppTbData.pszName     = "EDI Inspector";
+                    nppTbData.dlgID       = _idMyDlg;
+                    nppTbData.uMask       = NppTbMsg.DWS_DF_CONT_LEFT | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR;
+                    nppTbData.hIconTab    = (uint)_tbBmpTab.GetHicon();
+                    nppTbData.pszModuleName = PluginName;
 
-                Win32.SendMessage(PluginBase.nppData._nppHandle, (uint) NppMsg.NPPM_DMMREGASDCKDLG, 0, _ptrNppTbData);
-                Marshal.FreeHGlobal(_ptrNppTbData);
+                    IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));
+                    Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
+                    Win32.SendMessage(PluginBase.nppData._nppHandle,
+                                      (uint)NppMsg.NPPM_DMMREGASDCKDLG,
+                                      0, ptrNppTbData);
+                    Marshal.FreeHGlobal(ptrNppTbData);
+                }
+                else
+                {
+                    Win32.SendMessage(PluginBase.nppData._nppHandle,
+                                      (uint)NppMsg.NPPM_DMMSHOW,
+                                      0, _treeForm.Handle);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Win32.SendMessage(PluginBase.nppData._nppHandle, (uint) NppMsg.NPPM_DMMSHOW, 0, frmMyDlg.Handle);
+                HandleCommandException(ex, "Toggle EDI Tree Panel");
             }
         }
 
@@ -180,30 +254,44 @@ namespace Kbg.NppPluginNET
             MessageBox.Show(
                 "NppEdiPlugin — EDI Inspector for Notepad++\n" +
                 "Supports: EDIFACT, X12 (VDA planned)\n\n" +
-                "Phase 2 — Generic dispatchers",
+                "Phase 3 — Multi-DLL packaging\n" +
+                $"Bootstrap log: {BootstrapLogger.LogPath}",
                 "About",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
         }
 
-        // ── Helper methods ──────────────────────────────────────────────────
+        // ─────────────────────────────────────────────────────────────────────
+        // Helper methods
+        // ─────────────────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Reads the full text from the active Scintilla editor.
-        /// </summary>
         private static string GetEditorText()
         {
-            int length = scintilla.GetTextLength();
-            return scintilla.GetText(length + 1);
+            var sci    = GetScintilla();
+            int length = sci.GetTextLength();
+            return sci.GetText(length + 1);
         }
 
-        /// <summary>
-        /// Replaces the entire text in the active Scintilla editor.
-        /// </summary>
         private static void ReplaceEditorText(string newText)
         {
-            scintilla.SelectAll();
-            scintilla.ReplaceSel(newText);
+            var sci = GetScintilla();
+            sci.SelectAll();
+            sci.ReplaceSel(newText);
+        }
+
+        private static void HandleCommandException(Exception ex, string commandName)
+        {
+            string msg = $"An error occurred during '{commandName}':\n\n{ex.Message}";
+            
+            // Check for Mark of the Web (MOTW) load failures
+            if (ex is System.IO.FileLoadException || ex is NotSupportedException || 
+                (ex.InnerException != null && (ex.InnerException is System.IO.FileLoadException || ex.InnerException is NotSupportedException)))
+            {
+                msg += "\n\nThis may be caused by Windows blocking the downloaded plugin files (Mark of the Web).\n" +
+                       "Please close Notepad++, right-click the NppEdiPlugin ZIP or extracted DLLs in Explorer, select Properties, check 'Unblock', and try again.";
+            }
+            
+            MessageBox.Show(msg, PluginName, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

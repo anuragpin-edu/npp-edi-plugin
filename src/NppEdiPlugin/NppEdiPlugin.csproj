@@ -108,6 +108,7 @@
     <Compile Include="PluginInfrastructure\ScintillaGateway.cs" />
     <Compile Include="PluginInfrastructure\Scintilla_iface.cs" />
     <Compile Include="PluginInfrastructure\SettingsBase.cs" />
+    <Compile Include="PluginInfrastructure\BootstrapLogger.cs" />
     <Compile Include="PluginInfrastructure\UnmanagedExports.cs" />
     <Compile Include="PluginInfrastructure\Win32.cs" />
     <Compile Include="PluginInfrastructure\resource_h.cs" />

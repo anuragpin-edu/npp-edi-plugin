@@ -34,10 +34,106 @@ jobs:
     - name: Build NppEdiPlugin DLL (MSBuild)
       run: msbuild src\NppEdiPlugin\NppEdiPlugin.csproj /p:Configuration=Release /p:Platform=x64
 
+    - name: Native Load Test (isUnicode + getName)
+      shell: pwsh
+      run: |
+        $outDir = "src\NppEdiPlugin\bin\Release-x64"
+        $dllPath = "$outDir\NppEdiPlugin.dll"
+        Write-Output "Running native load test on: $dllPath"
+        & .\tools\Test-NativePluginLoad.ps1 -PluginDll $dllPath
+        if ($LASTEXITCODE -ne 0) {
+          Write-Error "Native load test failed (exit code $LASTEXITCODE)"
+          exit 1
+        }
+
+    - name: Validate Package Constraints
+      shell: pwsh
+      run: |
+        $outDir = "src\NppEdiPlugin\bin\Release-x64"
+        
+        # 1. Check Edi.* DLLs
+        $expectedEdiDlls = @("Edi.Core.dll", "Edi.Edifact.dll", "Edi.X12.dll", "Edi.Dictionaries.dll")
+        foreach ($dll in $expectedEdiDlls) {
+          if (-not (Test-Path "$outDir\$dll")) {
+            Write-Error "Missing required DLL: $dll"
+            exit 1
+          }
+        }
+        
+        # 2. Check Data directory and JSON files
+        $expectedDataFiles = @("edifact_D96A.json", "x12_00401.json", "x12_00501.json", "import-manifest.json")
+        foreach ($json in $expectedDataFiles) {
+          if (-not (Test-Path "$outDir\Data\$json")) {
+            Write-Error "Missing Data file: $json"
+            exit 1
+          }
+        }
+        
+        # 3. Check x64 architecture of NppEdiPlugin.dll via PE header
+        $bytes = [System.IO.File]::ReadAllBytes("$outDir\NppEdiPlugin.dll")
+        $peHeaderOffset = [System.BitConverter]::ToInt32($bytes, 0x3C)
+        $machine = [System.BitConverter]::ToUInt16($bytes, $peHeaderOffset + 4)
+        if ($machine -ne 0x8664) {
+          Write-Error "NppEdiPlugin.dll is not x64 (Machine code 0x$($machine.ToString('X')))"
+          exit 1
+        }
+        Write-Output "  Architecture: x64 (machine=0x8664) OK"
+        
+        # 4. Check exported native functions via dumpbin
+        # Locate dumpbin.exe from vswhere
+        $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" `
+          -latest -products * `
+          -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+          -property installationPath 2>$null
+        if ($vsPath) {
+          $dumpbinCandidates = Get-ChildItem "$vsPath\VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe" -ErrorAction SilentlyContinue
+          if ($dumpbinCandidates) {
+            $dumpbinExe = $dumpbinCandidates[0].FullName
+            $exports = & $dumpbinExe /EXPORTS "$outDir\NppEdiPlugin.dll" 2>&1
+            $expectedExports = @("isUnicode","setInfo","getFuncsArray","messageProc","getName","beNotified")
+            foreach ($exp in $expectedExports) {
+              if (-not ($exports | Select-String -SimpleMatch $exp -Quiet)) {
+                Write-Error "Missing Notepad++ export: $exp"
+                exit 1
+              }
+            }
+            Write-Output "  All 6 Notepad++ exports verified via dumpbin."
+          } else {
+            Write-Warning "dumpbin.exe not found under VS tools path; skipping dumpbin export check."
+          }
+        } else {
+          Write-Warning "vswhere did not return a VS path; skipping dumpbin export check."
+        }
+        
+        # 5. Check managed dependency closure (must be present beside main DLL)
+        $requiredDeps = @(
+          "System.Text.Json.dll",
+          "System.Memory.dll",
+          "Microsoft.Bcl.AsyncInterfaces.dll"
+        )
+        foreach ($dep in $requiredDeps) {
+          if (-not (Test-Path "$outDir\$dep")) {
+            Write-Error "Missing non-framework managed dependency: $dep"
+            exit 1
+          }
+        }
+        
+        Write-Output "All package constraints passed successfully."
+
+    - name: List complete package directory
+      shell: pwsh
+      run: |
+        $outDir = "src\NppEdiPlugin\bin\Release-x64"
+        Write-Output "=== Complete Release-x64 directory listing ==="
+        Get-ChildItem $outDir -Recurse | Sort-Object FullName |
+          Select-Object @{N='Path';E={$_.FullName -replace [regex]::Escape((Get-Location).Path+'\')}},
+                        @{N='Bytes';E={if ($_.PSIsContainer) {'<DIR>'} else {$_.Length}}} |
+          Format-Table -AutoSize
+
     - name: Upload NppEdiPlugin Artifact
       uses: actions/upload-artifact@v4
       with:
         name: NppEdiPlugin-x64
         path: |
-          src/NppEdiPlugin/bin/Release-x64/NppEdiPlugin.dll
+          src/NppEdiPlugin/bin/Release-x64/*.dll
           src/NppEdiPlugin/bin/Release-x64/Data/
