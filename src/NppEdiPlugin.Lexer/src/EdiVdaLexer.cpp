@@ -8,6 +8,9 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 #include "LexAccessor.h"
+#include "Accessor.h"
+#include "PropSetSimple.h"
+#include "WordList.h"
 #include "LexerModule.h"
 #include "LexerBase.h"
 #include "EdiStyles.h"
@@ -47,7 +50,7 @@ public:
                 char ch = styler.SafeGetCharAt(pos);
 
                 if (ch == '\r' || ch == '\n') {
-                    styler.ColourTo(pos, SCE_EDI_DEFAULT);
+                    styler.ColourTo(pos, EdiStyles::Default);
                     inRecordId = true;
                     recordIdCharCount = 0;
                 } else {
@@ -55,12 +58,12 @@ public:
                         if (std::isdigit(static_cast<unsigned char>(ch))) {
                             recordIdCharCount++;
                             if (recordIdCharCount == 3) {
-                                styler.ColourTo(pos, SCE_EDI_SEGMENT_ID);
+                                styler.ColourTo(pos, EdiStyles::SegmentId);
                                 inRecordId = false;
                             }
                         } else {
                             // If the first characters of the line are not digits, it's malformed or not an ID
-                            styler.ColourTo(pos, SCE_EDI_VALUE);
+                            styler.ColourTo(pos, EdiStyles::Value);
                             inRecordId = false;
                         }
                     } else {
@@ -69,7 +72,7 @@ public:
                 }
                 pos++;
             }
-            styler.ColourTo(endPos - 1, SCE_EDI_VALUE);
+            styler.ColourTo(endPos - 1, EdiStyles::Value);
             styler.Flush();
         } catch (...) {}
     }

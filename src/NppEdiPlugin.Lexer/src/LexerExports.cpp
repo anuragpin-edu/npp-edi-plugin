@@ -32,7 +32,7 @@ extern "C" {
     EXPORT_DEF void EXPORT_CC GetLexerName(unsigned int index, char *name, int buflength) {
         if (name && buflength > 0) {
             *name = '\0';
-            if (index < GetLexerCount()) {
+            if (index < static_cast<unsigned int>(GetLexerCount())) {
                 const char *lexName = lexerModules[index]->languageName;
                 if (lexName) {
                     size_t len = 0;
@@ -49,7 +49,7 @@ extern "C" {
     EXPORT_DEF Scintilla::ILexer5* EXPORT_CC CreateLexer(const char *name) {
         if (!name) return nullptr;
         
-        for (unsigned int i = 0; i < GetLexerCount(); ++i) {
+        for (unsigned int i = 0; i < static_cast<unsigned int>(GetLexerCount()); ++i) {
             const char* lexName = lexerModules[i]->languageName;
             if (lexName) {
                 const char* a = name;

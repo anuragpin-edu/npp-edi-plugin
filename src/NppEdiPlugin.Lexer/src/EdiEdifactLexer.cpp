@@ -7,6 +7,9 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 #include "LexAccessor.h"
+#include "Accessor.h"
+#include "PropSetSimple.h"
+#include "WordList.h"
 #include "LexerModule.h"
 #include "LexerBase.h"
 #include "EdiStyles.h"
@@ -72,22 +75,22 @@ public:
                 } else if (ch == releaseChar) {
                     isEscaped = true;
                 } else if (ch == '\r' || ch == '\n') {
-                    styler.ColourTo(pos, SCE_EDI_DEFAULT);
+                    styler.ColourTo(pos, EdiStyles::Default);
                     inSegmentId = true;
                     currentSegmentId = "";
                     pos++;
                     continue; // Skip styling this as segment
                 } else if (ch == elementSeparator || ch == componentSeparator) {
                     styler.ColourTo(pos - 1, inSegmentId ? 
-                        (isControlSegment(currentSegmentId) ? SCE_EDI_CONTROL : SCE_EDI_SEGMENT_ID) 
-                        : SCE_EDI_VALUE);
-                    styler.ColourTo(pos, SCE_EDI_SEPARATOR);
+                        (isControlSegment(currentSegmentId) ? EdiStyles::Control : EdiStyles::SegmentId) 
+                        : EdiStyles::Value);
+                    styler.ColourTo(pos, EdiStyles::Separator);
                     inSegmentId = false;
                 } else if (ch == segmentTerminator) {
                     styler.ColourTo(pos - 1, inSegmentId ? 
-                        (isControlSegment(currentSegmentId) ? SCE_EDI_CONTROL : SCE_EDI_SEGMENT_ID) 
-                        : SCE_EDI_VALUE);
-                    styler.ColourTo(pos, SCE_EDI_SEPARATOR);
+                        (isControlSegment(currentSegmentId) ? EdiStyles::Control : EdiStyles::SegmentId) 
+                        : EdiStyles::Value);
+                    styler.ColourTo(pos, EdiStyles::Separator);
                     inSegmentId = true;
                     currentSegmentId = "";
                 } else {
@@ -100,7 +103,7 @@ public:
                 }
                 pos++;
             }
-            styler.ColourTo(endPos - 1, SCE_EDI_VALUE);
+            styler.ColourTo(endPos - 1, EdiStyles::Value);
             styler.Flush();
         } catch (...) {}
     }

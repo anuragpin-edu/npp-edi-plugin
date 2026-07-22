@@ -1,11 +1,10 @@
 #pragma once
 
-// Define structural styles for EDI documents
-enum EdiStyles {
-    SCE_EDI_DEFAULT = 0,
-    SCE_EDI_SEGMENT_ID = 1,
-    SCE_EDI_SEPARATOR = 2,
-    SCE_EDI_VALUE = 3,
-    SCE_EDI_CONTROL = 4,   // Envelope/Control segments
-    SCE_EDI_ERROR = 5      // Malformed syntax
-};
+namespace EdiStyles {
+    constexpr int Default = 0;
+    constexpr int SegmentId = 1;
+    constexpr int Separator = 2;
+    constexpr int Value = 3;
+    constexpr int Control = 4;
+    constexpr int Error = 5;
+}
