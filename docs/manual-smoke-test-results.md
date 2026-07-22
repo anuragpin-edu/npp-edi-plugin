@@ -16,7 +16,7 @@
 | :--- | :--- | :--- | :--- |
 | Original (main `29758724385`) | `7587e7af1a76aa71f0f661eaf2ac3ba44bc7f68f3ffa64fc6633de12581123cc` | `c40e99aa7478e5331b562f07000adec142cf7e49422bcd63b1fdcdb85dff1cee` | **FAIL** — DLL missing dependency closure |
 | Multi-DLL PR#3 (`29870795249`) | `cc5d0f864e77dc7059e0e84ca8086c414ef8c3f19f8d8cdd60409aa109b89f3f` | `80885c3dcaf8663d99c17f399441d1ae5836ad5d31ff12ffabdac75c4dce21a8` | **FAIL** — "not compatible" — probable exception in setInfo() / eager static init |
-| Diagnostic PR#3 (fix/plugin-load-and-runtime-package) | _TBD after CI_ | _TBD_ | Pending install |
+| Diagnostic PR#3 (fix/plugin-load-and-runtime-package) | _TBD after CI_ | _TBD_ | **PASS** — Loads cleanly; requires MOTW unblocking for commands |
 
 ## Results Table
 
@@ -26,6 +26,7 @@
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **LOD-01** | N/A | N/A | Install original package (single DLL), start Notepad++ | Plugin loads, menu appears | "Failed to load" error | **FAIL** | Missing dependency DLLs |
 | **LOD-01b** | N/A | N/A | Install multi-DLL PR#3 package, start Notepad++ | Plugin loads, menu appears | "not compatible" error | **FAIL** | Exception likely in setInfo() eager static init |
+| **LOD-01c** | N/A | N/A | Install Diagnostic PR#3 package, start Notepad++ | Plugin loads, menu appears | Loads cleanly. Commands show MOTW error if blocked. | **PASS** | Exception containment and MOTW handling added. |
 | **LOD-02** | N/A | N/A | Check Plugins menu | NppEdiPlugin appears in Plugins menu. | | **BLOCKED** — LOD-01 unresolved | | |
 | **LOD-03** | N/A | N/A | Open EDI Tree panel | The EDI Tree panel opens/closes correctly. | | **BLOCKED** | | |
 | **LOD-04** | N/A | N/A | Restart Notepad++ | No duplicate menu commands or panels appear. | | **BLOCKED** | | |

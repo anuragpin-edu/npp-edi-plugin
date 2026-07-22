@@ -135,24 +135,31 @@ namespace Kbg.NppPluginNET
         /// </summary>
         internal static void ParseEdi()
         {
-            if (_treeForm == null || !_treeForm.Visible)
-                ToggleTreePanel();
-
-            string text   = GetEditorText();
-            var    doc    = GetParserDispatcher().Parse(text, GetDictionary());
-
-            if (doc.Standard == EdiStandard.Unknown)
+            try
             {
-                MessageBox.Show(
-                    "Could not detect a supported EDI standard in the current document.\n\n" +
-                    "Supported standards: EDIFACT, X12",
-                    PluginName,
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-                return;
-            }
+                if (_treeForm == null || !_treeForm.Visible)
+                    ToggleTreePanel();
 
-            _treeForm?.RenderDocument(doc);
+                string text   = GetEditorText();
+                var    doc    = GetParserDispatcher().Parse(text, GetDictionary());
+
+                if (doc.Standard == EdiStandard.Unknown)
+                {
+                    MessageBox.Show(
+                        "Could not detect a supported EDI standard in the current document.\n\n" +
+                        "Supported standards: EDIFACT, X12",
+                        PluginName,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                _treeForm?.RenderDocument(doc);
+            }
+            catch (Exception ex)
+            {
+                HandleCommandException(ex, "Parse EDI");
+            }
         }
 
         /// <summary>
@@ -160,17 +167,24 @@ namespace Kbg.NppPluginNET
         /// </summary>
         internal static void PrettifyEdi()
         {
-            string text   = GetEditorText();
-            var    result = GetFormatterDispatcher().Prettify(text);
-
-            if (!result.IsSuccess)
+            try
             {
-                MessageBox.Show(result.ErrorMessage, PluginName,
-                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+                string text   = GetEditorText();
+                var    result = GetFormatterDispatcher().Prettify(text);
 
-            ReplaceEditorText(result.FormattedText);
+                if (!result.IsSuccess)
+                {
+                    MessageBox.Show(result.ErrorMessage, PluginName,
+                                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                ReplaceEditorText(result.FormattedText);
+            }
+            catch (Exception ex)
+            {
+                HandleCommandException(ex, "Prettify EDI");
+            }
         }
 
         /// <summary>
@@ -178,46 +192,60 @@ namespace Kbg.NppPluginNET
         /// </summary>
         internal static void MinifyEdi()
         {
-            string text   = GetEditorText();
-            var    result = GetFormatterDispatcher().Minify(text);
-
-            if (!result.IsSuccess)
+            try
             {
-                MessageBox.Show(result.ErrorMessage, PluginName,
-                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+                string text   = GetEditorText();
+                var    result = GetFormatterDispatcher().Minify(text);
 
-            ReplaceEditorText(result.FormattedText);
+                if (!result.IsSuccess)
+                {
+                    MessageBox.Show(result.ErrorMessage, PluginName,
+                                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                ReplaceEditorText(result.FormattedText);
+            }
+            catch (Exception ex)
+            {
+                HandleCommandException(ex, "Minify EDI");
+            }
         }
 
         internal static void ToggleTreePanel()
         {
-            if (_treeForm == null)
+            try
             {
-                if (_tbBmpTab == null) _tbBmpTab = new Bitmap(16, 16);
-                _treeForm = new EdiTreeForm(GetScintilla());
+                if (_treeForm == null)
+                {
+                    if (_tbBmpTab == null) _tbBmpTab = new Bitmap(16, 16);
+                    _treeForm = new EdiTreeForm(GetScintilla());
 
-                NppTbData nppTbData = new NppTbData();
-                nppTbData.hClient     = _treeForm.Handle;
-                nppTbData.pszName     = "EDI Inspector";
-                nppTbData.dlgID       = _idMyDlg;
-                nppTbData.uMask       = NppTbMsg.DWS_DF_CONT_LEFT | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR;
-                nppTbData.hIconTab    = (uint)_tbBmpTab.GetHicon();
-                nppTbData.pszModuleName = PluginName;
+                    NppTbData nppTbData = new NppTbData();
+                    nppTbData.hClient     = _treeForm.Handle;
+                    nppTbData.pszName     = "EDI Inspector";
+                    nppTbData.dlgID       = _idMyDlg;
+                    nppTbData.uMask       = NppTbMsg.DWS_DF_CONT_LEFT | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR;
+                    nppTbData.hIconTab    = (uint)_tbBmpTab.GetHicon();
+                    nppTbData.pszModuleName = PluginName;
 
-                IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));
-                Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
-                Win32.SendMessage(PluginBase.nppData._nppHandle,
-                                  (uint)NppMsg.NPPM_DMMREGASDCKDLG,
-                                  0, ptrNppTbData);
-                Marshal.FreeHGlobal(ptrNppTbData);
+                    IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));
+                    Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
+                    Win32.SendMessage(PluginBase.nppData._nppHandle,
+                                      (uint)NppMsg.NPPM_DMMREGASDCKDLG,
+                                      0, ptrNppTbData);
+                    Marshal.FreeHGlobal(ptrNppTbData);
+                }
+                else
+                {
+                    Win32.SendMessage(PluginBase.nppData._nppHandle,
+                                      (uint)NppMsg.NPPM_DMMSHOW,
+                                      0, _treeForm.Handle);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Win32.SendMessage(PluginBase.nppData._nppHandle,
-                                  (uint)NppMsg.NPPM_DMMSHOW,
-                                  0, _treeForm.Handle);
+                HandleCommandException(ex, "Toggle EDI Tree Panel");
             }
         }
 
@@ -249,6 +277,21 @@ namespace Kbg.NppPluginNET
             var sci = GetScintilla();
             sci.SelectAll();
             sci.ReplaceSel(newText);
+        }
+
+        private static void HandleCommandException(Exception ex, string commandName)
+        {
+            string msg = $"An error occurred during '{commandName}':\n\n{ex.Message}";
+            
+            // Check for Mark of the Web (MOTW) load failures
+            if (ex is System.IO.FileLoadException || ex is NotSupportedException || 
+                (ex.InnerException != null && (ex.InnerException is System.IO.FileLoadException || ex.InnerException is NotSupportedException)))
+            {
+                msg += "\n\nThis may be caused by Windows blocking the downloaded plugin files (Mark of the Web).\n" +
+                       "Please close Notepad++, right-click the NppEdiPlugin ZIP or extracted DLLs in Explorer, select Properties, check 'Unblock', and try again.";
+            }
+            
+            MessageBox.Show(msg, PluginName, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }
