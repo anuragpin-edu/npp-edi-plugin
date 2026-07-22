@@ -10,17 +10,6 @@ Repository: https://github.com/hellooops/vscode-edi-support
 License: MIT
 Commit: 10d39d2495a1a8b5264bf35c311a1e07efa745e7
 
-**Schema data**: The X12 and EDIFACT schema JSON files in `src/Edi.Dictionaries/Data/`
-were imported from the `packages/edi-parser/src/schemas/` directory of this repository
-using the `tools/SchemaImporter/import_schemas.py` script. See `docs/SCHEMA_PROVENANCE.md`.
-
-**Architecture design**: The semantic token classification strategy (schema-driven type
-dispatch via `qualifierRef` and `dataType`), the exact element-offset span model, and
-the hover/call-tip content structure described in `docs/syntax-highlighting-architecture.md`
-were studied and reimplemented in C# as design inspiration. No TypeScript or JavaScript
-source code from this repository was copied into the C# project. The VS Code API surface
-(`SemanticTokensBuilder`, `HoverProvider`, `InlayHintsProvider`, etc.) was not ported.
-
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
