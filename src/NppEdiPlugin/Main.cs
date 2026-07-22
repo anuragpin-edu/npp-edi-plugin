@@ -42,7 +42,6 @@ namespace Kbg.NppPluginNET
         private static EdiFormatterDispatcher _formatterDispatcher;
         private static JsonEdiDictionary      _dictionary;
         private static ScintillaGateway       _scintilla;
-        private static NotepadPPGateway       _notepad;
 
         // ─────────────────────────────────────────────────────────────────────
         // Lazy-accessor helpers
