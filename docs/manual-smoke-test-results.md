@@ -18,6 +18,15 @@
 | Multi-DLL PR#3 (`29870795249`) | `cc5d0f864e77dc7059e0e84ca8086c414ef8c3f19f8d8cdd60409aa109b89f3f` | `80885c3dcaf8663d99c17f399441d1ae5836ad5d31ff12ffabdac75c4dce21a8` | **FAIL** — "not compatible" — probable exception in setInfo() / eager static init |
 | Diagnostic PR#3 (fix/plugin-load-and-runtime-package) | _TBD after CI_ | _TBD_ | **PASS** — Loads cleanly; requires MOTW unblocking for commands |
 
+## Command Execution
+
+| Command | Status | Notes |
+| :--- | :--- | :--- |
+| **Parse EDI** | **PASS** | Passed after recursively unblocking the package (MOTW). |
+| **Prettify EDI** | **PASS** | Output inspected. |
+| **Minify EDI** | **PASS** | Output inspected. |
+| **Toggle EDI Tree Panel** | **PASS** | |
+
 ## Results Table
 
 *(Status: `Not executed`, `Pass`, `Fail`, `Blocked`, `Verified only through automated tests`)*
@@ -27,9 +36,9 @@
 | **LOD-01** | N/A | N/A | Install original package (single DLL), start Notepad++ | Plugin loads, menu appears | "Failed to load" error | **FAIL** | Missing dependency DLLs |
 | **LOD-01b** | N/A | N/A | Install multi-DLL PR#3 package, start Notepad++ | Plugin loads, menu appears | "not compatible" error | **FAIL** | Exception likely in setInfo() eager static init |
 | **LOD-01c** | N/A | N/A | Install Diagnostic PR#3 package, start Notepad++ | Plugin loads, menu appears | Loads cleanly. Commands show MOTW error if blocked. | **PASS** | Exception containment and MOTW handling added. |
-| **LOD-02** | N/A | N/A | Check Plugins menu | NppEdiPlugin appears in Plugins menu. | | **BLOCKED** — LOD-01 unresolved | | |
-| **LOD-03** | N/A | N/A | Open EDI Tree panel | The EDI Tree panel opens/closes correctly. | | **BLOCKED** | | |
-| **LOD-04** | N/A | N/A | Restart Notepad++ | No duplicate menu commands or panels appear. | | **BLOCKED** | | |
+| **LOD-02** | N/A | N/A | Check Plugins menu | NppEdiPlugin appears in Plugins menu. | Menu appeared | **PASS** | | |
+| **LOD-03** | N/A | N/A | Open EDI Tree panel | The EDI Tree panel opens/closes correctly. | Tree opened | **PASS** | | |
+| **LOD-04** | N/A | N/A | Restart Notepad++ | No duplicate menu commands or panels appear. | | Not executed | | |
 | **NAV-01** | EDIFACT | D96A | Select segment in tree | Highlights the source segment. | | Not executed | | |
 | **NAV-02** | X12 | 00501 | Select off-screen segment | Scrolls it into view. | | Not executed | | |
 | **NAV-03** | X12 | 00501 | Repeated navigation | Does not throw an exception. | | Not executed | | |
@@ -37,10 +46,10 @@
 | **NAV-05** | EDIFACT | D96A | EDIFACT & X12 open | Switch tabs updates tree correctly. | | Not executed | | |
 | **NAV-06** | X12 | 00501 | Close active document | Does not leave invalid selection behavior. | | Not executed | | |
 | **NAV-07** | N/A | N/A | Open non-EDI text file | Tree clears or shows empty/unsupported. | | Not executed | | |
-| **EDF-01** | EDIFACT | D96A | Parse `edifact_d96a_orders_with_una.edi` | Correct standard/version, dict D96A selected. | | Not executed | | |
-| **EDF-02** | EDIFACT | D96A | Check semantic labels (EDF-01) | BGM labelled "Beginning of Message", elements appear. | | Not executed | | |
-| **EDF-03** | EDIFACT | D96A | Prettify (EDF-01) | UNA preserved, one segment per line. | | Not executed | | |
-| **EDF-04** | EDIFACT | D96A | Minify (EDF-01) | Formatting removed, values unchanged, re-parsing works. | | Not executed | | |
+| **EDF-01** | EDIFACT | D96A | Parse `edifact_d96a_orders_with_una.edi` | Correct standard/version, dict D96A selected. | Parsed D96A | **PASS** | | |
+| **EDF-02** | EDIFACT | D96A | Check semantic labels (EDF-01) | BGM labelled "Beginning of Message", elements appear. | Labels displayed | **PASS** | Dictionary enrichment works. | |
+| **EDF-03** | EDIFACT | D96A | Prettify (EDF-01) | UNA preserved, one segment per line. | | **PASS** | Output inspected. | |
+| **EDF-04** | EDIFACT | D96A | Minify (EDF-01) | Formatting removed, values unchanged, re-parsing works. | | **PASS** | Output inspected. | |
 | **EDF-05** | EDIFACT | D96A | Parse `edifact_d96a_orders_no_una.edi` | Parses successfully using default delimiters. | | Not executed | | |
 | **EDF-06** | EDIFACT | D96A | Parse `edifact_d96a_escaped.edi` | Escaped delimiters `?` parsed correctly. | | Not executed | | |
 | **EDF-07** | EDIFACT | D18A | Parse `edifact_d18a_unsupported.edi` | Parses structurally, shows raw version, lacks semantic enrichment. | | Not executed | | |
