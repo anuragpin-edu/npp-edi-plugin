@@ -61,6 +61,7 @@ target_sources(NppEdiLexer PRIVATE
 if (MSVC)
     target_compile_options(NppEdiLexer PRIVATE /EHsc /sdl /guard:cf /W4)
     target_link_options(NppEdiLexer PRIVATE /GUARD:CF)
+    target_compile_definitions(NppEdiLexer PRIVATE UNICODE _UNICODE)
     
     # We must export the 3 functions.
     # Alternatively we could use a .def file, but we'll use __declspec(dllexport) in LexerExports.cpp.
@@ -120,4 +121,6 @@ target_sources(NativePluginAbiTests PRIVATE
     ${lexilla_SOURCE_DIR}/lexlib/WordList.cxx
     ${lexilla_SOURCE_DIR}/lexlib/PropSetSimple.cxx
 )
+target_compile_definitions(NativePluginAbiTests PRIVATE UNICODE _UNICODE)
+
 add_test(NAME NativePluginAbiTests COMMAND NativePluginAbiTests)

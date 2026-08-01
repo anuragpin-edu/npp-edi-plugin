@@ -7,7 +7,7 @@
 // Forward declare the exported functions we want to test
 extern "C" {
     BOOL isUnicode();
-    const TCHAR* getName();
+    const wchar_t* getName();
     FuncItem* getFuncsArray(int* nbF);
     void setInfo(NppData notepadPlusData);
     void beNotified(SCNotification* notifyCode);
@@ -33,13 +33,9 @@ int main() {
     assert_test(isUnicode() == TRUE, "isUnicode() should return TRUE");
 
     // 2. getName
-    const TCHAR* name = getName();
+    const wchar_t* name = getName();
     assert_test(name != nullptr, "getName() should not return null");
-#ifdef _UNICODE
     assert_test(wcscmp(name, L"NppEdiLexer") == 0, "getName() should return NppEdiLexer");
-#else
-    assert_test(strcmp(name, "NppEdiLexer") == 0, "getName() should return NppEdiLexer");
-#endif
 
     // 3. getFuncsArray
     int nbFuncs = 0;
