@@ -137,3 +137,51 @@ jobs:
         path: |
           src/NppEdiPlugin/bin/Release-x64/*.dll
           src/NppEdiPlugin/bin/Release-x64/Data/
+
+    - name: Build Native Lexer (CMake)
+      run: |
+        cd src\NppEdiPlugin.Lexer
+        mkdir build
+        cd build
+        cmake -A x64 ..
+        cmake --build . --config Release
+
+    - name: Test Native Lexer
+      run: |
+        cd src\NppEdiPlugin.Lexer\build
+        ctest -C Release -V
+
+    - name: Validate Native Lexer Exports
+      shell: pwsh
+      run: |
+        $lexerDll = "src\NppEdiPlugin.Lexer\build\Release\NppEdiLexer.dll"
+        if (-not (Test-Path $lexerDll)) { Write-Error "Lexer DLL not found"; exit 1 }
+        # Verify XML exists
+        if (-not (Test-Path "src\NppEdiPlugin.Lexer\config\NppEdiLexer.xml")) { Write-Error "Lexer XML not found"; exit 1 }
+        
+        # Verify PE architecture
+        $bytes = [System.IO.File]::ReadAllBytes($lexerDll)
+        $peHeaderOffset = [System.BitConverter]::ToInt32($bytes, 0x3C)
+        $machine = [System.BitConverter]::ToUInt16($bytes, $peHeaderOffset + 4)
+        if ($machine -ne 0x8664) { Write-Error "NppEdiLexer.dll is not x64"; exit 1 }
+        Write-Output "Architecture: x64 OK"
+
+        $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath 2>$null
+        if ($vsPath) {
+          $dumpbinExe = (Get-ChildItem "$vsPath\VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe")[0].FullName
+          $exports = & $dumpbinExe /EXPORTS $lexerDll 2>&1
+          $expected = @("GetLexerCount", "GetLexerName", "CreateLexer", "isUnicode", "setInfo", "getName", "getFuncsArray", "beNotified", "messageProc")
+          foreach ($exp in $expected) {
+            if (-not ($exports | Select-String -SimpleMatch $exp -Quiet)) { Write-Error "Missing lexer export: $exp"; exit 1 }
+          }
+          Write-Output "All 9 Lexer/Plugin exports verified via dumpbin."
+        }
+
+    - name: Upload PoC-A Lexer Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: NppEdiLexer-PoC-x64
+        path: |
+          src/NppEdiPlugin.Lexer/build/Release/NppEdiLexer.dll
+          src/NppEdiPlugin.Lexer/config/NppEdiLexer.xml
+          src/NppEdiPlugin.Lexer/README-install.txt
