@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<NotepadPlus>
+    <LexerStyles>
+        <LexerType name="edi_x12" desc="EDI X12" ext="">
+            <WordsStyle name="Default" styleID="0" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="EnvelopeOrControl" styleID="1" fgColor="800080" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="" />
+            <WordsStyle name="SegmentOrRecordId" styleID="2" fgColor="0000FF" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="" />
+            <WordsStyle name="Separator" styleID="3" fgColor="808080" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="TextValue" styleID="4" fgColor="008000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="NumberOrDate" styleID="5" fgColor="FF8000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="InvalidSyntax" styleID="6" fgColor="FF0000" bgColor="FFFF00" fontName="" fontStyle="1" fontSize="" />
+        </LexerType>
+        <LexerType name="edi_edifact" desc="EDI EDIFACT" ext="">
+            <WordsStyle name="Default" styleID="0" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="EnvelopeOrControl" styleID="1" fgColor="800080" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="" />
+            <WordsStyle name="SegmentOrRecordId" styleID="2" fgColor="0000FF" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="" />
+            <WordsStyle name="Separator" styleID="3" fgColor="808080" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="TextValue" styleID="4" fgColor="008000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="NumberOrDate" styleID="5" fgColor="FF8000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="InvalidSyntax" styleID="6" fgColor="FF0000" bgColor="FFFF00" fontName="" fontStyle="1" fontSize="" />
+        </LexerType>
+        <LexerType name="edi_vda" desc="EDI VDA" ext="">
+            <WordsStyle name="Default" styleID="0" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="EnvelopeOrControl" styleID="1" fgColor="800080" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="" />
+            <WordsStyle name="SegmentOrRecordId" styleID="2" fgColor="0000FF" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="" />
+            <WordsStyle name="Separator" styleID="3" fgColor="808080" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="TextValue" styleID="4" fgColor="008000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="NumberOrDate" styleID="5" fgColor="FF8000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="InvalidSyntax" styleID="6" fgColor="FF0000" bgColor="FFFF00" fontName="" fontStyle="1" fontSize="" />
+        </LexerType>
+    </LexerStyles>
+</NotepadPlus>

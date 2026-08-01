@@ -20,9 +20,17 @@ FetchContent_Declare(
     URL_HASH SHA256=5c147f927927b35c55c630ef3a9affd5708400a3cad80447cc1043ab9a816f31
 )
 
-FetchContent_MakeAvailable(scintilla lexilla)
+# Pin nppPluginTemplate (for Notepad++ Plugin API headers)
+FetchContent_Declare(
+    nppPluginTemplate
+    URL "https://github.com/npp-plugins/plugintemplate/archive/987553015dc12caf2ca0e49617ba1f0e2d17faae.zip"
+    URL_HASH SHA256=634173fb8e86ff8bed36eba5c540d804f6b1dd348bc89a2b819d0546f894de0a
+)
+
+FetchContent_MakeAvailable(scintilla lexilla nppPluginTemplate)
 
 add_library(NppEdiLexer SHARED
+    src/PluginExports.cpp
     src/LexerExports.cpp
     src/EdiX12Lexer.cpp
     src/EdiEdifactLexer.cpp
@@ -35,6 +43,7 @@ target_include_directories(NppEdiLexer PRIVATE
     ${scintilla_SOURCE_DIR}/include
     ${lexilla_SOURCE_DIR}/include
     ${lexilla_SOURCE_DIR}/lexlib
+    ${nppplugintemplate_SOURCE_DIR}/src
 )
 
 # Compile necessary lexlib files directly:
@@ -86,3 +95,29 @@ target_sources(NativeLexerTests PRIVATE
 )
 
 add_test(NAME NativeLexerTests COMMAND NativeLexerTests)
+
+add_executable(NativePluginAbiTests tests/NativePluginAbiTests.cpp)
+target_include_directories(NativePluginAbiTests PRIVATE
+    include
+    src
+    ${nppplugintemplate_SOURCE_DIR}/src
+    ${scintilla_SOURCE_DIR}/include
+    ${lexilla_SOURCE_DIR}/include
+    ${lexilla_SOURCE_DIR}/lexlib
+)
+target_sources(NativePluginAbiTests PRIVATE
+    src/PluginExports.cpp
+    src/LexerExports.cpp
+    src/EdiX12Lexer.cpp
+    src/EdiEdifactLexer.cpp
+    src/EdiVdaLexer.cpp
+    ${lexilla_SOURCE_DIR}/lexlib/Accessor.cxx
+    ${lexilla_SOURCE_DIR}/lexlib/CharacterCategory.cxx
+    ${lexilla_SOURCE_DIR}/lexlib/CharacterSet.cxx
+    ${lexilla_SOURCE_DIR}/lexlib/LexerBase.cxx
+    ${lexilla_SOURCE_DIR}/lexlib/LexerModule.cxx
+    ${lexilla_SOURCE_DIR}/lexlib/LexerSimple.cxx
+    ${lexilla_SOURCE_DIR}/lexlib/WordList.cxx
+    ${lexilla_SOURCE_DIR}/lexlib/PropSetSimple.cxx
+)
+add_test(NAME NativePluginAbiTests COMMAND NativePluginAbiTests)
