@@ -37,17 +37,17 @@ int main() {
     assert_test(name != nullptr, "getName() should not return null");
     assert_test(wcscmp(name, L"NppEdiLexer") == 0, "getName() should return NppEdiLexer");
 
-    // 3. getFuncsArray
+    // 3. setInfo (should not crash)
+    NppData data = {0};
+    setInfo(data);
+    assert_test(true, "setInfo() handled safely");
+
+    // 4. getFuncsArray
     int nbFuncs = 0;
     FuncItem* funcs = getFuncsArray(&nbFuncs);
     assert_test(nbFuncs == 1, "getFuncsArray() should return exactly 1 command");
     assert_test(funcs != nullptr, "getFuncsArray() should not return null");
     assert_test(funcs[0]._pFunc != nullptr, "FuncItem should have a valid function pointer");
-
-    // 4. setInfo (should not crash)
-    NppData data = {0};
-    setInfo(data);
-    assert_test(true, "setInfo() handled safely");
 
     // 5. beNotified (should not crash)
     SCNotification notify = {0};
